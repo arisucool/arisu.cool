@@ -13,9 +13,9 @@
 
 <iframe
   class="calendar-frame"
-  src="https://calendar.google.com/calendar/embed?height=600&wkst=1&bgcolor=%23ffffff&ctz=Asia%2FTokyo&showTitle=0&src=ZTBjNTRlMWViYWJiNjI2MjE2ZWU1NDllYWEyODZhNDdkYzQ4NDA1YmYwMTMyNjUwMTRiNGJiOGJhMjhjNGNhMUBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=amEuamFwYW5lc2UjaG9saWRheUBncm91cC52LmNhbGVuZGFyLmdvb2dsZS5jb20&color=%234b7abd&color=%230B8043"
+  [src]="calendarUrl"
+  *ngIf="calendarUrl"
   style="border: solid 1px #777"
-  width="800"
   height="600"
   frameborder="0"
   scrolling="no"
@@ -24,17 +24,11 @@
 <div class="app-card bordered">
   <p>
     ご利用のカレンダーで購読:<br />
-    <a
-      href="https://calendar.google.com/calendar/embed?src=e0c54e1ebabb626216ee549eaa286a47dc48405bf013265014b4bb8ba28c4ca1%40group.calendar.google.com&ctz=Asia%2FTokyo"
-      target="_blank"
-      rel="noopener"
+    <a [href]="calendarRegisterUrls['gcal']" target="_blank" rel="noopener"
       >Google カレンダー</a
     >
     |
-    <a
-      href="https://calendar.google.com/calendar/ical/e0c54e1ebabb626216ee549eaa286a47dc48405bf013265014b4bb8ba28c4ca1%40group.calendar.google.com/public/basic.ics"
-      target="_blank"
-      rel="noopener"
+    <a [href]="calendarRegisterUrls['ical']" target="_blank" rel="noopener"
       >その他のカレンダー</a
     >
     (iCal形式)
