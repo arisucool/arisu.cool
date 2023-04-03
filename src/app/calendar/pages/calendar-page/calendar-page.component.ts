@@ -20,7 +20,7 @@ export class CalendarPageComponent implements OnInit {
 
   constructor(
     private domSanitizer: DomSanitizer,
-    private deviceDetectorService: DeviceDetectorService
+    public deviceDetectorService: DeviceDetectorService
   ) {}
 
   ngOnInit() {

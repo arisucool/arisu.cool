@@ -1,13 +1,15 @@
 <div class="app-page-summary">
-  <h2>ありすカレンダー</h2>
+  <h2>ありすカレンダー (α ver.)</h2>
 </div>
 
 <div class="app-card bordered">
   <p>
-    アイドルマスターシンデレラガールズ /
-    U149「橘ありす」についての非公式カレンダーです。<br />
-    速報性・正確性・網羅性などは一切保証できませんので、自己責任でご利用ください。<br />
-    予定の終了時刻や繰り返しは、あくまで推測です。また予告なく更新を終了する可能性があります。
+    橘ありすさんの活動に関する非公式カレンダー。<br />
+    <small>
+      速報性・正確性・網羅性などは保証できません。<br />
+      予定の終了時刻や繰り返し等は基本的に推測です。<br />
+      予告なく、予定の形式を変更したり、更新を休止・終了する可能性があります。自己責任でご利用下さい。</small
+    >
   </p>
 </div>
 
@@ -22,17 +24,30 @@
 ></iframe>
 
 <div class="app-card bordered">
-  <p>
-    ご利用のカレンダーで購読:<br />
-    <a [href]="calendarRegisterUrls['gcal']" target="_blank" rel="noopener"
-      >Google カレンダー</a
-    >
-    |
-    <a [href]="calendarRegisterUrls['ical']" target="_blank" rel="noopener"
-      >その他のカレンダー</a
-    >
-    (iCal形式)
-  </p>
+  <p>ご利用されているカレンダーアプリへ登録:</p>
+  <ul>
+    <li>
+      Google カレンダー: &nbsp;
+      <a [href]="calendarRegisterUrls['gcal']" target="_blank" rel="noopener"
+        ><img
+          border="0"
+          src="https://www.google.com/calendar/images/ext/gc_button1_ja.gif"
+          style="vertical-align: middle"
+      /></a>
+    </li>
+    <li>
+      その他 (.ics): &nbsp;
+      <input matInput [value]="calendarRegisterUrls['ical']" /><br />
+      <ng-container *ngIf="this.deviceDetectorService.os === 'iOS'">
+        <small
+          >iOS のカレンダーにも登録できます。<br />
+          "カレンダー" アプリを開き、画面左下の "カレンダーを追加" →
+          "照会カレンダーを追加" をタップします。<br />
+          さらに、"照会URL" 欄に上記のURLを入力してください。</small
+        >
+      </ng-container>
+    </li>
+  </ul>
 </div>
 
 <div class="app-bottom-navigation">
