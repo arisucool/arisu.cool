@@ -9,10 +9,28 @@
 }
 
 // ヘッダ
+
 mat-toolbar {
   background-color: #bedbfd;
   color: #333333;
-  box-shadow: inset 1px 0px 1px rgba(85, 85, 85, 0.6666666667);
+  box-shadow: inset 0px 0px 1px rgba(85, 85, 85, 0.6666666667);
+  height: 42px;
+
+  .spacer {
+    flex: 1 1 auto;
+  }
+}
+
+// バナー (応援メッセージ)
+
+.top-banner {
+  background-color: #4976a9;
+  color: white;
+  font-size: 0.8rem;
+  padding: 0.4rem 0 0.4rem 0;
+  margin: 0 0 0 0;
+  text-align: center;
+  text-decoration: none;
 }
 
 // フッタ
