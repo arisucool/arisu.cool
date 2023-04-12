@@ -1,0 +1,36 @@
+<mat-list-item>
+  <span matListItemIcon>
+    <mat-checkbox
+      style="float: left"
+      [(ngModel)]="item.isDone"
+      (ngModelChange)="itemChange.emit(item)"
+    ></mat-checkbox>
+  </span>
+
+  <span matListItemTitle>
+    {{ item.name }}
+  </span>
+
+  <span matListItemLine>
+    [{{ item.category }}] &nbsp;
+    <ng-container *ngIf="item.url">
+      <a [href]="item.url" target="_blank" rel="noopener">
+        <mat-icon>link</mat-icon>
+      </a>
+      &nbsp; /
+    </ng-container>
+    {{ item.maker || "-" }}
+  </span>
+
+  <span
+    matListItemLine
+    *ngIf="
+      item.reservationStartDate !== undefined &&
+      item.reservationStartDate.length > 0 &&
+      !isPastDate(item.reservationStartDate)
+    "
+  >
+    予約開始:
+    {{ item.reservationStartDate | date : "yyyy/MM/dd" }}
+  </span>
+</mat-list-item>

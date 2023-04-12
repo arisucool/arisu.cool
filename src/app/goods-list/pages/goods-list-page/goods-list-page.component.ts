@@ -39,13 +39,6 @@ export class GoodsListPageComponent implements OnInit {
     }
   }
 
-  isDone(item: GoodsListItem) {}
-
-  isPastDate(dateString: string) {
-    const date = new Date(dateString);
-    return date.getTime() < Date.now();
-  }
-
   async onItemStatusChange(item: GoodsListItem) {
     await this.goodsListService.setItemStatus(item.id, item.isDone);
     this.load();

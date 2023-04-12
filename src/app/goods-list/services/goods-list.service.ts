@@ -92,6 +92,14 @@ export class GoodsListService {
       const isDone = status ? status['isDone'] : false;
       item.isDone = isDone;
     }
+
+    // 予約開始日順にソート
+    items.sort((a, b) => {
+      if (a.reservationStartDate === undefined) return 1;
+      if (b.reservationStartDate === undefined) return -1;
+      return a.reservationStartDate.localeCompare(b.reservationStartDate);
+    });
+
     return items;
   }
 

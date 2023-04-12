@@ -2,75 +2,29 @@
   <h2>ありすグッズリスト (α ver.)</h2>
 </div>
 
-<div class="app-card bordered goods-list">
+<div class="app-card bordered goods-list" style="padding-left: 0.5rem">
   <!-- 未完了  -->
   <mat-list #goodsList>
     <div mat-subheader>未仕分け・未注文</div>
-    <mat-list-item *ngFor="let item of items.undone">
-      <span matListItemIcon>
-        <mat-checkbox
-          style="float: left"
-          [(ngModel)]="item.isDone"
-          (ngModelChange)="onItemStatusChange(item)"
-        ></mat-checkbox>
-      </span>
-      <span matListItemTitle>
-        {{ item.name }}
-      </span>
-      <span matListItemLine>
-        {{ item.category }}
-        /
-        {{ item.maker || "-" }}
-        <ng-container *ngIf="item.reservationStartDate">
-          / 予約開始:
-          <span [ngClass]="{ past: isPastDate(item.reservationStartDate) }">
-            {{ item.reservationStartDate | date : "yyyy/MM/dd" }}
-          </span>
-        </ng-container>
-        <ng-container *ngIf="item.url">
-          / 予約開始:
-          <a [href]="item.url" target="_blank" rel="noopener">
-            <mat-icon>link</mat-icon>
-          </a>
-        </ng-container>
-      </span>
-    </mat-list-item>
+    <ng-container *ngFor="let item of items.undone">
+      <app-goods-list-item
+        [item]="item"
+        (itemChange)="onItemStatusChange(item)"
+      ></app-goods-list-item>
+    </ng-container>
   </mat-list>
   <!---->
 </div>
-<div class="app-card bordered goods-list">
+<div class="app-card bordered goods-list" style="padding-left: 0.5rem">
   <!-- 完了  -->
   <mat-list #goodsList>
     <div mat-subheader>注文済・見送り済</div>
-    <mat-list-item *ngFor="let item of items.done">
-      <span matListItemIcon>
-        <mat-checkbox
-          style="float: left"
-          [(ngModel)]="item.isDone"
-          (ngModelChange)="onItemStatusChange(item)"
-        ></mat-checkbox>
-      </span>
-      <span matListItemTitle>
-        {{ item.name }}
-      </span>
-      <span matListItemLine>
-        {{ item.category }}
-        /
-        {{ item.maker || "-" }}
-        <ng-container *ngIf="item.reservationStartDate">
-          / 予約開始:
-          <span [ngClass]="{ past: isPastDate(item.reservationStartDate) }">
-            {{ item.reservationStartDate | date : "yyyy/MM/dd" }}
-          </span>
-        </ng-container>
-        <ng-container *ngIf="item.url">
-          / 予約開始:
-          <a [href]="item.url" target="_blank" rel="noopener">
-            <mat-icon>link</mat-icon>
-          </a>
-        </ng-container>
-      </span>
-    </mat-list-item>
+    <ng-container *ngFor="let item of items.done">
+      <app-goods-list-item
+        [item]="item"
+        (itemChange)="onItemStatusChange(item)"
+      ></app-goods-list-item>
+    </ng-container>
   </mat-list>
   <!---->
 </div>
