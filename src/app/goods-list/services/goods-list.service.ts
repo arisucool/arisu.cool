@@ -48,7 +48,7 @@ export class GoodsListService {
 
     for (const item of parsed) {
       const id = GoodsListService.getValueByMatchedKey(item, 'id');
-      if (!id || !isNaN(id)) {
+      if (!id || isNaN(id)) {
         continue;
       }
 
@@ -69,6 +69,7 @@ export class GoodsListService {
         priceWithTax: GoodsListService.getValueByMatchedKey(item, '税込価格'),
         place: GoodsListService.getValueByMatchedKey(item, '場所'),
         url: GoodsListService.getValueByMatchedKey(item, 'URL'),
+        note: GoodsListService.getValueByMatchedKey(item, '補足情報'),
         isDone: false,
       });
     }
@@ -94,7 +95,6 @@ export class GoodsListService {
   private async injectStatuses(items: GoodsListItem[]) {
     for (const item of items) {
       const status = await this.storage?.get(item.id.toString());
-      console.log(status);
       const isDone = status ? status['isDone'] : false;
       item.isDone = isDone;
     }
@@ -114,8 +114,11 @@ export class GoodsListService {
 
     const keys = Object.keys(jsonObject);
     for (const k of keys) {
-      if (k.toLowerCase().indexOf(expectedKey) !== -1) {
-        console.log(key, k);
+      if (k.toLowerCase().indexOf(expectedKey) === 0) {
+        let v = jsonObject[k];
+        if (v === undefined || v.trim() === '' || v === '-') {
+          return undefined;
+        }
         return jsonObject[k];
       }
     }

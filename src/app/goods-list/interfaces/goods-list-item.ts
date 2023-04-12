@@ -17,6 +17,8 @@ export interface GoodsListItem {
   priceWithTax?: number;
   // 場所
   place?: string;
+  // 補足情報
+  note?: string;
   // URL
   url?: string;
   // ステータス

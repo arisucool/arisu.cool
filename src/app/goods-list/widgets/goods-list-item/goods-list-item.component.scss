@@ -5,3 +5,12 @@ a {
     vertical-align: middle;
   }
 }
+
+// 予約受付開始前
+
+.before-booking {
+  .mat-mdc-list-item-title,
+  .mat-mdc-list-item-icon {
+    opacity: 0.6;
+  }
+}

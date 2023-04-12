@@ -1,4 +1,9 @@
-<mat-list-item>
+<mat-list-item
+  [ngClass]="{
+    'before-booking':
+      item.reservationStartDate && !isPastDate(item.reservationStartDate)
+  }"
+>
   <span matListItemIcon>
     <mat-checkbox
       style="float: left"
@@ -25,12 +30,33 @@
   <span
     matListItemLine
     *ngIf="
-      item.reservationStartDate !== undefined &&
-      item.reservationStartDate.length > 0 &&
-      !isPastDate(item.reservationStartDate)
+      (item.reservationStartDate !== undefined &&
+        !isPastDate(item.reservationStartDate)) ||
+      item.note !== undefined
     "
   >
-    予約開始:
-    {{ item.reservationStartDate | date : "yyyy/MM/dd" }}
+    <ng-container
+      *ngIf="
+        item.reservationStartDate !== undefined &&
+        !isPastDate(item.reservationStartDate)
+      "
+    >
+      予約開始:
+      {{ item.reservationStartDate | date : "yyyy/MM/dd" }}
+    </ng-container>
+
+    <ng-container
+      *ngIf="
+        item.reservationStartDate !== undefined &&
+        !isPastDate(item.reservationStartDate) &&
+        item.note !== undefined
+      "
+    >
+      /
+    </ng-container>
+
+    <span *ngIf="item.note !== undefined" [matTooltip]="'補足: ' + item.note">
+      {{ item.note }}
+    </span>
   </span>
 </mat-list-item>

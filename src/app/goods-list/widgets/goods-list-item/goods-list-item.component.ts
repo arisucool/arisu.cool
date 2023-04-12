@@ -16,7 +16,6 @@ export class GoodsListItemComponent {
   isPastDate(dateString: string) {
     const date = new Date(dateString);
     const isPast = date.getTime() < Date.now();
-    console.log(dateString, isPast);
     return isPast;
   }
 }
