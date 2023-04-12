@@ -2,7 +2,15 @@
   <h2>ありすグッズリスト (α ver.)</h2>
 </div>
 
-<div class="app-card bordered goods-list" style="padding-left: 0.5rem">
+<div *ngIf="items === undefined" class="app-card bordered">
+  <p>読み込んでいます...しばらくお待ちください...</p>
+</div>
+
+<div
+  *ngIf="items !== undefined"
+  class="app-card bordered goods-list"
+  style="padding-left: 0.5rem"
+>
   <!-- 未完了  -->
   <mat-list #goodsList>
     <div mat-subheader>未仕分け・未注文</div>
@@ -15,7 +23,12 @@
   </mat-list>
   <!---->
 </div>
-<div class="app-card bordered goods-list" style="padding-left: 0.5rem">
+
+<div
+  *ngIf="items !== undefined"
+  class="app-card bordered goods-list"
+  style="padding-left: 0.5rem"
+>
   <!-- 完了  -->
   <mat-list #goodsList>
     <div mat-subheader>注文済・見送り済</div>

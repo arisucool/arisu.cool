@@ -12,13 +12,10 @@ import { GoodsListService } from '../../services/goods-list.service';
   ],
 })
 export class GoodsListPageComponent implements OnInit {
-  public items: {
+  public items?: {
     undone: GoodsListItem[];
     done: GoodsListItem[];
-  } = {
-    undone: [],
-    done: [],
-  };
+  } = undefined;
 
   constructor(
     public goodsListService: GoodsListService,
@@ -32,8 +29,10 @@ export class GoodsListPageComponent implements OnInit {
   async load() {
     try {
       const items = await this.goodsListService.getGoodsList();
-      this.items.undone = items.filter((item) => !item.isDone);
-      this.items.done = items.filter((item) => item.isDone);
+      this.items = {
+        undone: items.filter((item) => !item.isDone),
+        done: items.filter((item) => item.isDone),
+      };
     } catch (e: any) {
       this.snackBar.open(`エラー: ${e.message}`, 'OK');
     }
