@@ -45,9 +45,15 @@ export class GoodsListService {
     const parsed = await res.json();
 
     let items: GoodsListItem[] = [];
+
     for (const item of parsed) {
+      const id = GoodsListService.getValueByMatchedKey(item, 'id');
+      if (!id || !isNaN(id)) {
+        continue;
+      }
+
       items.push({
-        id: GoodsListService.getValueByMatchedKey(item, 'id'),
+        id: parseInt(id, 10),
         category: GoodsListService.getValueByMatchedKey(item, 'カテゴリ'),
         maker: GoodsListService.getValueByMatchedKey(item, 'メーカー'),
         reservationStartDate: GoodsListService.getValueByMatchedKey(
