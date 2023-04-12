@@ -6,11 +6,7 @@
   <p>読み込んでいます...しばらくお待ちください...</p>
 </div>
 
-<div
-  *ngIf="items !== undefined"
-  class="app-card bordered goods-list"
-  style="padding-left: 0.5rem"
->
+<div *ngIf="items !== undefined" class="app-card bordered goods-list">
   <!-- 未完了  -->
   <mat-list #goodsList>
     <div mat-subheader>未仕分け・未注文</div>
@@ -24,11 +20,7 @@
   <!---->
 </div>
 
-<div
-  *ngIf="items !== undefined"
-  class="app-card bordered goods-list"
-  style="padding-left: 0.5rem"
->
+<div *ngIf="items !== undefined" class="app-card bordered goods-list">
   <!-- 完了  -->
   <mat-list #goodsList>
     <div mat-subheader>注文済・見送り済</div>

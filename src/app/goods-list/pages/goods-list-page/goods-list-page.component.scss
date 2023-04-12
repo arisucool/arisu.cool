@@ -11,13 +11,17 @@
   padding: 1rem 1rem 0.75rem 1rem;
 }
 
-.calendar-frame {
-  width: 95vw;
-  max-width: 1200px;
-}
-
 // 小さい文字
 
 small {
   font-size: 0.8rem;
+}
+
+// レスポンシブ
+
+@media screen and (max-width: 768px) {
+  .goods-list {
+    padding-left: 0;
+    padding-right: 0;
+  }
 }
