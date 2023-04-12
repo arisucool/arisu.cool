@@ -1,0 +1,27 @@
+:host {
+  padding: 1.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+}
+
+.app-card {
+  padding: 1rem 1rem 0.75rem 1rem;
+}
+
+.calendar-frame {
+  width: 95vw;
+  max-width: 1200px;
+}
+
+// 小さい文字
+
+small {
+  font-size: 0.8rem;
+}
+
+// グッズリスト
+.goods-list {
+}

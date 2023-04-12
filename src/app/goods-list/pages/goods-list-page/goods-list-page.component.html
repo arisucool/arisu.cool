@@ -1,0 +1,90 @@
+<div class="app-page-summary">
+  <h2>ありすグッズリスト (α ver.)</h2>
+</div>
+
+<div class="app-card bordered goods-list">
+  <!-- 未完了  -->
+  <mat-list #goodsList>
+    <div mat-subheader>未仕分け・未注文</div>
+    <mat-list-item *ngFor="let item of items.undone">
+      <span matListItemIcon>
+        <mat-checkbox
+          style="float: left"
+          [(ngModel)]="item.isDone"
+          (ngModelChange)="onItemStatusChange(item)"
+        ></mat-checkbox>
+      </span>
+      <span matListItemTitle>
+        {{ item.name }}
+      </span>
+      <span matListItemLine>
+        {{ item.category }}
+        /
+        {{ item.maker || "-" }}
+        <ng-container *ngIf="item.reservationStartDate">
+          / 予約開始:
+          <span [ngClass]="{ past: isPastDate(item.reservationStartDate) }">
+            {{ item.reservationStartDate | date : "yyyy/MM/dd" }}
+          </span>
+        </ng-container>
+        <ng-container *ngIf="item.url">
+          / 予約開始:
+          <a [href]="item.url" target="_blank" rel="noopener">
+            <mat-icon>link</mat-icon>
+          </a>
+        </ng-container>
+      </span>
+    </mat-list-item>
+  </mat-list>
+  <!---->
+</div>
+<div class="app-card bordered goods-list">
+  <!-- 完了  -->
+  <mat-list #goodsList>
+    <div mat-subheader>注文済・見送り済</div>
+    <mat-list-item *ngFor="let item of items.done">
+      <span matListItemIcon>
+        <mat-checkbox
+          style="float: left"
+          [(ngModel)]="item.isDone"
+          (ngModelChange)="onItemStatusChange(item)"
+        ></mat-checkbox>
+      </span>
+      <span matListItemTitle>
+        {{ item.name }}
+      </span>
+      <span matListItemLine>
+        {{ item.category }}
+        /
+        {{ item.maker || "-" }}
+        <ng-container *ngIf="item.reservationStartDate">
+          / 予約開始:
+          <span [ngClass]="{ past: isPastDate(item.reservationStartDate) }">
+            {{ item.reservationStartDate | date : "yyyy/MM/dd" }}
+          </span>
+        </ng-container>
+        <ng-container *ngIf="item.url">
+          / 予約開始:
+          <a [href]="item.url" target="_blank" rel="noopener">
+            <mat-icon>link</mat-icon>
+          </a>
+        </ng-container>
+      </span>
+    </mat-list-item>
+  </mat-list>
+  <!---->
+</div>
+
+<div class="app-card bordered">
+  <p>
+    <small>
+      ※ 速報性・正確性・網羅性などは保証できません。<br />
+      また、予告なく、更新を休止・終了する可能性があります。自己責任でご利用下さい。<br /><br />
+      ※ 変更した内容は、端末内のみに保存されます。<br />ブラウザのキャッシュ消去などで消えることもある為、おまけ程度にご活用ください。</small
+    >
+  </p>
+</div>
+
+<div class="app-bottom-navigation">
+  <a routerLink="/"> <mat-icon>navigate_before</mat-icon> &nbsp; ホームへ</a>
+</div>

@@ -13,6 +13,11 @@ const routes: Routes = [
       import('./calendar/calendar.module').then((m) => m.CalendarModule),
   },
   {
+    path: 'arisu-goods-list',
+    loadChildren: () =>
+      import('./goods-list/goods-list.module').then((m) => m.GoodsListModule),
+  },
+  {
     path: '',
     redirectTo: 'home',
     pathMatch: 'full',
