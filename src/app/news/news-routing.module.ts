@@ -7,7 +7,7 @@ const routes: Routes = [
   {
     path: '',
     component: NewsListPageComponent,
-    title: 'ニュース・タチバナ',
+    title: 'ストック・タチバナ',
   },
   {
     path: 'articles',
@@ -16,7 +16,7 @@ const routes: Routes = [
   {
     path: 'articles/:id',
     component: NewsDetailPageComponent,
-    title: 'ニュース・タチバナ',
+    title: 'ストック・タチバナ',
   },
 ];
 

@@ -15,4 +15,16 @@ export class NewsItemSummaryLineComponent {
 
   @Input()
   isVisibleTags: boolean = false;
+
+  isToday(date: Date | string) {
+    const today = new Date();
+
+    const d = typeof date === 'string' ? new Date(date) : date;
+
+    return (
+      d.getFullYear() === today.getFullYear() &&
+      d.getMonth() === today.getMonth() &&
+      d.getDate() === today.getDate()
+    );
+  }
 }

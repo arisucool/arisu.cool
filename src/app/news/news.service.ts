@@ -13,12 +13,14 @@ export class NewsService {
   constructor(private appCacheService: AppCacheService) {}
 
   async getNewsItems(lastId?: number): Promise<NewsItem[]> {
-    const cached = await this.appCacheService.getCachedJson(
+    let cached = await this.appCacheService.getCachedJson(
       this.CACHE_KEY,
       this.CACHE_EXPIRES
     );
     if (cached) {
-      return cached.map((item: NewsItem) => this.formatNewsItem(item));
+      cached = cached.map((item: NewsItem) => this.formatNewsItem(item));
+      cached = this.sortNewsItems(cached);
+      return cached;
     }
 
     const req = await fetch(environment.NEWS_LIST_JSON_API_URL);
@@ -27,13 +29,18 @@ export class NewsService {
 
     // データを整形
     items = items.map((item: NewsItem) => this.formatNewsItem(item));
+    items = this.sortNewsItems(items);
 
+    return items;
+  }
+
+  sortNewsItems(items: NewsItem[]) {
     // 整形後の情報でソート
-    items = items.sort((a: NewsItem, b: NewsItem) => {
+    items = items.sort((a: any, b: any) => {
       if (!a.createdAt) return 1;
       if (!b.createdAt) return -1;
 
-      return b.createdAt.getTime() - a.createdAt.getTime();
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
 
     return items;

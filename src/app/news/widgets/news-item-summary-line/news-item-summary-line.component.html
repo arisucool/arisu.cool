@@ -20,15 +20,15 @@
           : ''
       "
     >
-      <ng-container
-        *ngIf="item.children && item.children.length >= 1; else tplCreatedAt"
-      >
-        {{ item.children[0].createdAt | date : "yyyy/MM/dd HH:mm" }}
-        <mat-icon>update</mat-icon>
+      <ng-container *ngIf="this.isToday(item.createdAt)">
+        {{ item.createdAt | date : "HH:mm" }}
       </ng-container>
-      <ng-template #tplCreatedAt>
-        {{ item.createdAt | date : "yyyy/MM/dd HH:mm" }}
-      </ng-template>
+      <ng-container *ngIf="!this.isToday(item.createdAt)">
+        {{ item.createdAt | date : "yyyy/MM/dd (E) HH:mm" }}
+      </ng-container>
+      <ng-container *ngIf="item.children && item.children.length >= 1">
+        <mat-icon> update </mat-icon>
+      </ng-container>
     </p>
     <!---->
 
