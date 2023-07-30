@@ -1,11 +1,25 @@
-<a
-  href="https://cinderella-u149-anime.idolmaster-official.jp/"
-  target="_blank"
-  rel="noopener"
-  class="top-banner"
->
-  小さなシンデレラ達の輝く日を TVアニメ で見届けよう
-</a>
+<!-- トップバナー -->
+<ng-container *ngIf="this.isBirthday; else animeBanner">
+  <a
+    href="https://idollist.idolmaster-official.jp/detail/20104"
+    target="_blank"
+    rel="noopener"
+    class="top-banner"
+  >
+    🎂 今日は橘ありすさんのお誕生日です！ 🎉
+  </a>
+</ng-container>
+<ng-template #animeBanner>
+  <a
+    href="https://cinderella-u149-anime.idolmaster-official.jp/"
+    target="_blank"
+    rel="noopener"
+    class="top-banner"
+  >
+    小さなシンデレラ達の輝く日を TVアニメ で見届けよう
+  </a>
+</ng-template>
+<!---->
 
 <mat-toolbar>
   <a routerLink="/">
