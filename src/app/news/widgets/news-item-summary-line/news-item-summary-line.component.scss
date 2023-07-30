@@ -1,0 +1,56 @@
+:host {
+  color: #666666;
+  font-size: 0.9rem;
+  margin: 0 0 0 0;
+  width: 100%;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  margin: 0 0 0 0;
+  width: 100%;
+}
+
+.createdAt {
+  mat-icon {
+    font-size: 1.2rem;
+    height: 1.2rem;
+    width: 1.2rem;
+    line-height: 1.2rem;
+    margin-left: 0.5rem;
+    vertical-align: middle;
+  }
+}
+
+.category {
+  mat-icon {
+    font-size: 1.2rem;
+    height: 1.2rem;
+    width: 1.2rem;
+    line-height: 1.2rem;
+    margin-right: 0.2rem;
+    vertical-align: middle;
+  }
+}
+
+ul.tags {
+  list-style-type: none;
+  margin: 0.5rem 0 0.5rem 0;
+  padding: 0 0 0 0;
+
+  li {
+    color: #666666;
+    display: inline-block;
+    margin-right: 0.7rem;
+
+    mat-icon {
+      font-size: 1.2rem;
+      height: 1.2rem;
+      width: 1.2rem;
+      line-height: 1.2rem;
+      vertical-align: middle;
+      margin-right: 0.25rem;
+    }
+  }
+}

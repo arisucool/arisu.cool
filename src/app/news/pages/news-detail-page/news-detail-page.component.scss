@@ -45,37 +45,6 @@
       }
     }
 
-    ul.tags {
-      list-style-type: none;
-      margin: 0 0 0 0;
-      padding: 0 0 0 0;
-
-      li {
-        color: #666666;
-        display: inline-block;
-        margin-right: 0.7rem;
-
-        mat-icon {
-          font-size: 1.2rem;
-          height: 1.2rem;
-          width: 1.2rem;
-          line-height: 1.2rem;
-          vertical-align: middle;
-        }
-      }
-    }
-
-    .metadata {
-      display: flex;
-      justify-content: space-between;
-      padding: 0 0.5rem 0 0.5rem;
-
-      .createdAt {
-        font-size: 0.8rem;
-        color: #666;
-      }
-    }
-
     .content {
       white-space: pre-wrap;
     }

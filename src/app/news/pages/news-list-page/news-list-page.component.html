@@ -1,18 +1,18 @@
 <div class="app-page-summary">
-  <h2>ニュース・タチバナ <small>まとめ版 α ver. </small></h2>
+  <h2>ストック・タチバナ <small>α ver. </small></h2>
 </div>
 
 <div class="app-card bordered">
   <p style="font-size: 0.8rem">
-    このまとめは、ニュース・タチバナ (<a
+    このページは、ニュース・タチバナ (<a
       href="https://twitter.com/arisu_newsfeed"
       target="_blank"
       rel="noopener"
       >@arisu_newsfeed</a
-    >) を整理し、橘ありすさんの活動記録として活用する実験的な試みです。<br /><br />
-    ※ 記事タイトルは、
-    AIで自動要約して生成しています。一部誤りもありますが、人力で修正中です。ご了承下さい。<br /><br />
-    より正確な情報や、最新情報については、<a
+    >) の情報を整理し、橘ありすさんの活動記録にするという実験的な試みです。<br /><br />
+    ※ タイトルや分類は、 本文を元にして
+    AIで自動生成しています。一部誤りもありますが、人力で修正中です。ご了承下さい。<br /><br />
+    より正確な情報や、最新ニュースは、<a
       href="https://twitter.com/arisu_newsfeed"
       target="_blank"
       rel="noopener"
@@ -32,7 +32,12 @@
       [routerLink]="'articles/' + item.id"
       target="_blank"
     >
-      <div class="news-item app-card bordered">
+      <div
+        class="news-item app-card bordered"
+        [ngClass]="{
+          'with-children': item.children && item.children.length >= 1
+        }"
+      >
         <!-- タイトル -->
         <p class="title">
           {{ item.title }}
@@ -52,29 +57,20 @@
         </ng-container>
         <!---->
 
+        <!-- アップデートテキスト -->
+        <p
+          class="update-text"
+          *ngIf="item.children && item.children.length >= 1"
+        >
+          [更新]
+          {{ item.children[0].title }}
+        </p>
+        <!---->
+
         <!-- サマリー -->
         <div class="summary">
-          <!-- 作成・更新日時 -->
-          <p class="createdAt">
-            <ng-container
-              *ngIf="
-                item.children && item.children.length >= 1;
-                else tplCreatedAt
-              "
-            >
-              {{ item.children[0].createdAt | date : "yyyy/MM/dd HH:mm" }}
-            </ng-container>
-            <ng-template #tplCreatedAt>
-              {{ item.createdAt | date : "yyyy/MM/dd HH:mm" }}
-            </ng-template>
-          </p>
-          <!---->
-          <!-- カテゴリ -->
-          <p class="category">
-            <mat-icon>folder</mat-icon>
-            {{ item.category }}
-          </p>
-          <!---->
+          <app-news-item-summary-line [item]="item">
+          </app-news-item-summary-line>
         </div>
         <!---->
       </div>

@@ -1,0 +1,42 @@
+<ng-container *ngIf="this.item">
+  <div class="row" *ngIf="this.isVisibleTags">
+    <!-- タグ -->
+    <ul class="tags">
+      <li class="tag" *ngFor="let tag of item.tags">
+        <mat-icon> local_offer </mat-icon>
+        {{ tag }}
+      </li>
+    </ul>
+    <!---->
+  </div>
+
+  <div class="row">
+    <!-- 作成・更新日時 -->
+    <p
+      class="createdAt"
+      [matTooltip]="
+        item.children && item.children.length >= 1
+          ? 'この日時に情報が追加されました'
+          : ''
+      "
+    >
+      <ng-container
+        *ngIf="item.children && item.children.length >= 1; else tplCreatedAt"
+      >
+        {{ item.children[0].createdAt | date : "yyyy/MM/dd HH:mm" }}
+        <mat-icon>update</mat-icon>
+      </ng-container>
+      <ng-template #tplCreatedAt>
+        {{ item.createdAt | date : "yyyy/MM/dd HH:mm" }}
+      </ng-template>
+    </p>
+    <!---->
+
+    <!-- カテゴリ -->
+    <p class="category">
+      <mat-icon>folder</mat-icon>
+      {{ item.category }}
+    </p>
+    <!---->
+  </div>
+</ng-container>
