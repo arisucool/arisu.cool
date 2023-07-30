@@ -1,0 +1,127 @@
+<div class="app-page-summary">
+  <a routerLink="../">
+    <h2>ニュース・タチバナ まとめ版</h2>
+  </a>
+</div>
+
+<div class="news-item">
+  <!-- 記事が見つからなかったとき-->
+  <ng-container *ngIf="this.newsItem === null">
+    記事が見つかりません
+  </ng-container>
+  <!---->
+
+  <!-- 記事が見つかったとき -->
+  <ng-container *ngIf="this.newsItem">
+    <div class="app-card bordered summary-card">
+      <!-- 記事タイトル -->
+      <p class="title">
+        {{ this.newsItem.title }}
+      </p>
+      <!---->
+
+      <!-- メタデータ -->
+      <div class="metadata">
+        <!-- カテゴリ -->
+        <p class="category">
+          <mat-icon>folder</mat-icon>
+          {{ this.newsItem.category }}
+        </p>
+        <!---->
+
+        <!-- タグ -->
+        <ul class="tags">
+          <li *ngFor="let tag of this.newsItem.tags">
+            <mat-icon>local_offer</mat-icon>
+            {{ tag }}
+          </li>
+        </ul>
+        <!---->
+
+        <!-- 作成・更新日時 -->
+        <p class="createdAt">
+          <ng-container
+            *ngIf="
+              this.newsItem.children && this.newsItem.children.length >= 1;
+              else tplCreatedAt
+            "
+          >
+            {{
+              this.newsItem.children[0].createdAt | date : "yyyy/MM/dd HH:mm"
+            }}
+          </ng-container>
+          <ng-template #tplCreatedAt>
+            {{ this.newsItem.createdAt | date : "yyyy/MM/dd HH:mm" }}
+          </ng-template>
+        </p>
+        <!---->
+      </div>
+      <!---->
+    </div>
+
+    <!-- コンテンツ -->
+    <ng-container
+      *ngIf="
+        this.newsItem.children && this.newsItem.children.length >= 1;
+        else tplContent
+      "
+    >
+      <ng-container *ngFor="let child of this.newsItem.children">
+        <div class="app-card bordered">
+          <p class="content">
+            <ng-container *ngIf="child.tweetId">
+              <ngx-twitter-tweet
+                [tweetID]="child.tweetId"
+                [options]="this.tweetEmbedOption"
+              >
+              </ngx-twitter-tweet>
+            </ng-container>
+            <ng-container *ngIf="!child.tweetId">
+              {{ child.content }}
+            </ng-container>
+          </p>
+        </div>
+      </ng-container>
+
+      <div class="app-card bordered">
+        <p class="content">
+          <ng-container *ngIf="this.newsItem.tweetId">
+            <ngx-twitter-tweet
+              [tweetID]="this.newsItem.tweetId"
+              [options]="this.tweetEmbedOption"
+            >
+            </ngx-twitter-tweet>
+          </ng-container>
+          <ng-container *ngIf="!this.newsItem.tweetId">
+            {{ this.newsItem.content }}
+          </ng-container>
+        </p>
+      </div>
+    </ng-container>
+
+    <ng-template #tplContent>
+      <div class="app-card bordered">
+        <p class="content">
+          <ng-container *ngIf="this.newsItem.tweetId">
+            <ngx-twitter-tweet
+              [tweetID]="this.newsItem.tweetId"
+              [options]="this.tweetEmbedOption"
+            >
+            </ngx-twitter-tweet>
+          </ng-container>
+          <ng-container *ngIf="!this.newsItem.tweetId">
+            {{ this.newsItem.content }}
+          </ng-container>
+        </p>
+      </div>
+    </ng-template>
+    <!---->
+  </ng-container>
+  <!---->
+</div>
+
+<div class="app-bottom-navigation">
+  <a routerLink="/arisu-news">
+    <mat-icon>navigate_before</mat-icon> &nbsp; ニュース一覧へ</a
+  >
+</div>

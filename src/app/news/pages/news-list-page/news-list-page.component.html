@@ -1,0 +1,54 @@
+<div class="app-page-summary">
+  <h2>ニュース・タチバナ まとめ版</h2>
+</div>
+
+<div class="news-items">
+  <!-- 記事 -->
+  <ng-container *ngFor="let item of this.newsItems">
+    <a [routerLink]="'articles/' + item.id">
+      <div class="news-item app-card bordered">
+        <!-- タイトル -->
+        <p class="title">
+          {{ item.title }}
+        </p>
+        <!---->
+
+        <!-- 更新日 -->
+        <!-- 作成・更新日時 -->
+        <p class="createdAt">
+          <ng-container
+            *ngIf="
+              item.children && item.children.length >= 1;
+              else tplCreatedAt
+            "
+          >
+            {{ item.children[0].createdAt | date : "yyyy/MM/dd HH:mm" }}
+          </ng-container>
+          <ng-template #tplCreatedAt>
+            {{ item.createdAt | date : "yyyy/MM/dd HH:mm" }}
+          </ng-template>
+        </p>
+        <!---->
+        <!---->
+      </div>
+    </a>
+  </ng-container>
+  <!---->
+</div>
+
+<div class="app-card bordered">
+  <p style="font-size: 0.8rem">
+    新着情報のチェックには、 Twiter アカウント (<a
+      href="https://twitter.com/arisu_newsfeed"
+      target="_blank"
+      rel="noopener"
+      >@arisu_newsfeed</a
+    >) が便利です。 <br /><br />
+    速報性・正確性・網羅性などは保証できませんが、なるべく頑張ります！<br />
+    ※ ご意見・ご感想・ご指摘・応援などは Twitter アカウントへ。
+  </p>
+</div>
+
+<div class="app-bottom-navigation">
+  <a routerLink="/"> <mat-icon>navigate_before</mat-icon> &nbsp; ホームへ</a>
+</div>

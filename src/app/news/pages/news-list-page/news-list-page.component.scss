@@ -1,0 +1,37 @@
+:host {
+  padding: 1.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+}
+
+.app-card {
+  padding: 0.25rem 1rem 0.25rem 1rem;
+}
+
+// ニュース
+
+.news-items {
+  display: flex;
+  gap: 2vw;
+  max-width: 1024px;
+
+  a {
+    text-decoration: none;
+  }
+
+  .news-item {
+    width: 30vw;
+
+    .title {
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+
+    .category {
+    }
+  }
+}
