@@ -9,6 +9,7 @@ import { NewsItem } from '../../interfaces/news-item.interface';
 })
 export class NewsListPageComponent implements OnInit {
   newsItems: NewsItem[] = [];
+  numOfShowingItems = 5;
 
   constructor(private newsService: NewsService) {}
 
@@ -18,5 +19,9 @@ export class NewsListPageComponent implements OnInit {
 
   async load() {
     this.newsItems = await this.newsService.getNewsItems();
+  }
+
+  async loadMore() {
+    this.numOfShowingItems += 20;
   }
 }

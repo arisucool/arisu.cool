@@ -1,11 +1,37 @@
 <div class="app-page-summary">
-  <h2>ニュース・タチバナ まとめ版</h2>
+  <h2>ニュース・タチバナ <small>まとめ版 α ver. </small></h2>
+</div>
+
+<div class="app-card bordered">
+  <p style="font-size: 0.8rem">
+    このまとめは、ニュース・タチバナ (<a
+      href="https://twitter.com/arisu_newsfeed"
+      target="_blank"
+      rel="noopener"
+      >@arisu_newsfeed</a
+    >) を整理し、橘ありすさんの活動記録として活用する実験的な試みです。<br /><br />
+    ※ 記事タイトルは、
+    AIで自動要約して生成しています。一部誤りもありますが、人力で修正中です。ご了承下さい。<br /><br />
+    より正確な情報や、最新情報については、<a
+      href="https://twitter.com/arisu_newsfeed"
+      target="_blank"
+      rel="noopener"
+      >@arisu_newsfeed</a
+    >
+    をご利用ください。ご意見もお待ちしております。<br />
+  </p>
 </div>
 
 <div class="news-items">
   <!-- 記事 -->
-  <ng-container *ngFor="let item of this.newsItems">
-    <a [routerLink]="'articles/' + item.id">
+  <ng-container
+    *ngFor="let item of this.newsItems | slice : 0 : numOfShowingItems"
+  >
+    <a
+      class="news-item-container"
+      [routerLink]="'articles/' + item.id"
+      target="_blank"
+    >
       <div class="news-item app-card bordered">
         <!-- タイトル -->
         <p class="title">
@@ -13,40 +39,59 @@
         </p>
         <!---->
 
-        <!-- 更新日 -->
-        <!-- 作成・更新日時 -->
-        <p class="createdAt">
-          <ng-container
-            *ngIf="
-              item.children && item.children.length >= 1;
-              else tplCreatedAt
-            "
+        <!-- リマインダー -->
+        <ng-container *ngIf="item.reminderEndDate">
+          <p
+            class="reminder"
+            matTooltip="{{
+              item.reminderEndDate | date : 'YYYY/MM/dd'
+            }} までのリマインダーがあります"
           >
-            {{ item.children[0].createdAt | date : "yyyy/MM/dd HH:mm" }}
-          </ng-container>
-          <ng-template #tplCreatedAt>
-            {{ item.createdAt | date : "yyyy/MM/dd HH:mm" }}
-          </ng-template>
-        </p>
+            <mat-icon> notifications_active </mat-icon>
+          </p>
+        </ng-container>
         <!---->
+
+        <!-- サマリー -->
+        <div class="summary">
+          <!-- 作成・更新日時 -->
+          <p class="createdAt">
+            <ng-container
+              *ngIf="
+                item.children && item.children.length >= 1;
+                else tplCreatedAt
+              "
+            >
+              {{ item.children[0].createdAt | date : "yyyy/MM/dd HH:mm" }}
+            </ng-container>
+            <ng-template #tplCreatedAt>
+              {{ item.createdAt | date : "yyyy/MM/dd HH:mm" }}
+            </ng-template>
+          </p>
+          <!---->
+          <!-- カテゴリ -->
+          <p class="category">
+            <mat-icon>folder</mat-icon>
+            {{ item.category }}
+          </p>
+          <!---->
+        </div>
         <!---->
       </div>
     </a>
   </ng-container>
   <!---->
-</div>
 
-<div class="app-card bordered">
-  <p style="font-size: 0.8rem">
-    新着情報のチェックには、 Twiter アカウント (<a
-      href="https://twitter.com/arisu_newsfeed"
-      target="_blank"
-      rel="noopener"
-      >@arisu_newsfeed</a
-    >) が便利です。 <br /><br />
-    速報性・正確性・網羅性などは保証できませんが、なるべく頑張ります！<br />
-    ※ ご意見・ご感想・ご指摘・応援などは Twitter アカウントへ。
-  </p>
+  <!-- ページネーション -->
+  <ng-container
+    *ngIf="
+      numOfShowingItems < this.newsItems.length &&
+      this.numOfShowingItems !== undefined
+    "
+  >
+    <button mat-stroked-button (click)="this.loadMore()">さらに表示</button>
+  </ng-container>
+  <!---->
 </div>
 
 <div class="app-bottom-navigation">

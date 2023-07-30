@@ -8,7 +8,7 @@ import { AppCacheService } from '../shared/services/app-cache.service';
 })
 export class NewsService {
   readonly CACHE_KEY = 'arisuNewsList';
-  readonly CACHE_EXPIRES = 1000 * 60 * 15; // 15 minutes
+  readonly CACHE_EXPIRES = 1000 * 60 * 5; // 5 minutes
 
   constructor(private appCacheService: AppCacheService) {}
 
@@ -17,19 +17,34 @@ export class NewsService {
       this.CACHE_KEY,
       this.CACHE_EXPIRES
     );
-    if (cached) return cached;
+    if (cached) {
+      return cached.map((item: NewsItem) => this.formatNewsItem(item));
+    }
 
     const req = await fetch(environment.NEWS_LIST_JSON_API_URL);
-    const items = await req.json();
-
+    let items = await req.json();
     this.appCacheService.setCachedJson(this.CACHE_KEY, items);
 
-    return items;
+    return items.map((item: NewsItem) => this.formatNewsItem(item));
   }
 
   async getNewsItem(id: number) {
     const items = await this.getNewsItems();
     const item = items.find((item) => item.id === id);
+
+    if (!item) {
+      return undefined;
+    }
+
+    return this.formatNewsItem(item);
+  }
+
+  /**
+   * データの整形処理
+   * @param newsItem
+   * @returns
+   */
+  private formatNewsItem(item: NewsItem) {
     if (!item) return undefined;
 
     item.tweetId = item.tweetUrl
@@ -43,6 +58,21 @@ export class NewsService {
           : undefined;
         return child;
       });
+
+      const reminderEndDates: Date[] = [];
+      item.children.forEach((child) => {
+        if (child.reminderEndDate) {
+          reminderEndDates.push(new Date(child.reminderEndDate));
+        }
+      });
+
+      // 最も近い日付を取得する
+      if (reminderEndDates.length !== 0) {
+        const nearestDate = reminderEndDates.reduce((a, b) =>
+          a.getTime() < b.getTime() ? a : b
+        );
+        item.reminderEndDate = nearestDate.toISOString();
+      }
     }
 
     return item;
