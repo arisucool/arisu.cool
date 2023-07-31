@@ -12,7 +12,7 @@ export class NewsService {
 
   constructor(private appCacheService: AppCacheService) {}
 
-  async getNewsItems(lastId?: number): Promise<NewsItem[]> {
+  async getNewsItems(categoryOrTag?: string): Promise<NewsItem[]> {
     let cached = await this.appCacheService.getCachedJson(
       this.CACHE_KEY,
       this.CACHE_EXPIRES
@@ -20,6 +20,7 @@ export class NewsService {
     if (cached) {
       cached = cached.map((item: NewsItem) => this.formatNewsItem(item));
       cached = this.sortNewsItems(cached);
+      cached = this.filterNewsItems(cached, categoryOrTag);
       return cached;
     }
 
@@ -30,8 +31,29 @@ export class NewsService {
     // データを整形
     items = items.map((item: NewsItem) => this.formatNewsItem(item));
     items = this.sortNewsItems(items);
+    items = this.filterNewsItems(cached, categoryOrTag);
 
     return items;
+  }
+
+  filterNewsItems(items: NewsItem[], categoryOrTag?: string) {
+    if (!categoryOrTag) return items;
+
+    return items.filter((item) => {
+      if (item.category === categoryOrTag) return true;
+      if (item.tags && item.tags.includes(categoryOrTag)) return true;
+
+      if (item.children) {
+        return item.children.some((child) => {
+          if (child.category === categoryOrTag) return true;
+          if (child.tags && child.tags.includes(categoryOrTag)) return true;
+
+          return false;
+        });
+      }
+
+      return false;
+    });
   }
 
   sortNewsItems(items: NewsItem[]) {

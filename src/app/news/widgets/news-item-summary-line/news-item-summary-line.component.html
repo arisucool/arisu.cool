@@ -3,8 +3,10 @@
     <!-- タグ -->
     <ul class="tags">
       <li class="tag" *ngFor="let tag of item.tags">
-        <mat-icon> local_offer </mat-icon>
-        {{ tag }}
+        <a [routerLink]="'/arisu-news'" [queryParams]="{ categoryOrTag: tag }">
+          <mat-icon> local_offer </mat-icon>
+          {{ tag }}
+        </a>
       </li>
     </ul>
     <!---->
@@ -34,8 +36,13 @@
 
     <!-- カテゴリ -->
     <p class="category">
-      <mat-icon>folder</mat-icon>
-      {{ item.category }}
+      <a
+        [routerLink]="'/arisu-news'"
+        [queryParams]="{ categoryOrTag: item.category }"
+      >
+        <mat-icon>folder</mat-icon>
+        {{ item.category }}
+      </a>
     </p>
     <!---->
   </div>

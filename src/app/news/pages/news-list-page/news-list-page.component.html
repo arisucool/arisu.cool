@@ -1,7 +1,8 @@
 <div class="app-page-summary">
-  <h2>ストック・タチバナ <small>α ver. </small></h2>
+  <a routerLink="/arisu-news">
+    <h2>ストック・タチバナ <small>α ver. </small></h2>
+  </a>
 </div>
-
 <div class="app-card bordered">
   <p style="font-size: 0.8rem">
     このページは、ニュース・タチバナ (<a
@@ -12,14 +13,30 @@
     >) の情報を整理することで、<br />
     ニュースを俯瞰しやすくするとともに、ありすさんの活動記録を作っていく実験的な試みです。<br /><br />
     ※ タイトルや分類は、 本文を元にして
-    AIで自動生成しています。一部誤りもありますが、人力で修正中です。ご了承下さい。<br /><br />
+    AIで自動生成しています。一部誤りもありますが、人力で修正中です。ご了承下さい。<br />
+    ※ リツイートのみの投稿など、一部掲載できていない話題も未だあります。<br /><br />
     より正確な情報や、最新ニュースは、<a
       href="https://twitter.com/arisu_newsfeed"
       target="_blank"
       rel="noopener"
       >@arisu_newsfeed</a
     >
-    をご利用ください。ご意見もお待ちしております。<br />
+    をご利用ください。ご意見もお待ちしております！<br />
+  </p>
+</div>
+
+<div class="filter" *ngIf="this.filterCategoryOrTag">
+  <p>
+    "{{ this.filterCategoryOrTag }}" の記事のみ表示中
+
+    <button
+      mat-icon-button
+      matTooltip="フィルタを解除"
+      routerLink="/arisu-news"
+      [queryParams]="{}"
+    >
+      <mat-icon>cancel</mat-icon>
+    </button>
   </p>
 </div>
 

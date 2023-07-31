@@ -12,6 +12,11 @@
   width: 100%;
 }
 
+a {
+  text-decoration: none;
+  color: #666666 !important;
+}
+
 .createdAt {
   mat-icon {
     font-size: 1.2rem;
