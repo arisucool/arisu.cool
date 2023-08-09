@@ -24,9 +24,12 @@
         *ngIf="isShowingTotalPrice"
         class="goods-total-price"
         [matTooltip]="
-          totalPrice.minPrice !== totalPrice.maxPrice
-            ? 'チェックを入れた商品の合計額です。ランダム商品があるため、単体購入時とBOX購入時の価格差を表示しています'
-            : 'チェックを入れた商品の合計額です'
+          (this.isShowingArchivedItems
+            ? 'アーカイブされたグッズも含め、チェックを入れた商品の合計額です。'
+            : 'チェックを入れた商品の合計額です。') +
+          (totalPrice.minPrice !== totalPrice.maxPrice
+            ? 'ランダム商品があるため、単体購入時とBOX購入時の価格差を表示しています'
+            : '')
         "
       >
         <ng-container *ngIf="totalPrice.minPrice !== totalPrice.maxPrice">
@@ -67,15 +70,16 @@
     [matTooltip]="
       this.isShowingArchivedItems ? 'アーカイブを非表示' : 'アーカイブを表示'
     "
-    (click)="this.isShowingArchivedItems = !this.isShowingArchivedItems"
+    (click)="toggleShowingArchive()"
+    [disabled]="numOfArchivedItems === 0"
   >
     <ng-container *ngIf="this.isShowingArchivedItems">
       <mat-icon style="vertical-align: middle">expand_less</mat-icon>
-      アーカイブしたグッズを非表示
+      アーカイブしたグッズを非表示 ({{ numOfArchivedItems }}件)&nbsp;
     </ng-container>
     <ng-container *ngIf="!this.isShowingArchivedItems">
       <mat-icon style="vertical-align: middle">expand_more</mat-icon>
-      アーカイブしたグッズを表示
+      アーカイブしたグッズを表示 ({{ numOfArchivedItems }}件)&nbsp;
     </ng-container>
   </button>
   <!---->

@@ -51,12 +51,20 @@ export class GoodsListService {
     return await this.injectStatuses(parsed);
   }
 
-  getTotalPriceByGoodsList(items: GoodsListItem[]): GoodsTotalPrice {
+  getTotalPriceByGoodsList(
+    items: GoodsListItem[],
+    isIncludesArchivedItems = false
+  ): GoodsTotalPrice {
     let minTotalPrice = 0,
       maxTotalPrice = 0;
     for (const item of items) {
+      if (!isIncludesArchivedItems && item.isArchived) continue;
+
       if (item.children) {
-        let r = this.getTotalPriceByGoodsList(item.children);
+        let r = this.getTotalPriceByGoodsList(
+          item.children,
+          isIncludesArchivedItems
+        );
         minTotalPrice += r.minPrice;
         maxTotalPrice += r.maxPrice;
       } else {

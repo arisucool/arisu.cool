@@ -14,17 +14,20 @@ import { GoodsTotalPrice } from '../../interfaces/goods-total-price';
 })
 export class GoodsListPageComponent implements OnInit {
   // グッズリスト
-  public items?: GoodsListItem[];
+  items?: GoodsListItem[];
+
+  // アーカイブされたアイテムの数
+  numOfArchivedItems = 0;
 
   // 総額
-  public isShowingTotalPrice = false;
-  public totalPrice: GoodsTotalPrice = {
+  isShowingTotalPrice = false;
+  totalPrice: GoodsTotalPrice = {
     minPrice: 0,
     maxPrice: 0,
   };
 
   // アーカイブしたアイテムを表示するか
-  public isShowingArchivedItems = false;
+  isShowingArchivedItems = false;
 
   constructor(
     public goodsListService: GoodsListService,
@@ -37,10 +40,10 @@ export class GoodsListPageComponent implements OnInit {
 
   async load() {
     try {
+      // グッズリストを取得
       this.items = await this.goodsListService.getGoodsList();
-      this.totalPrice = this.goodsListService.getTotalPriceByGoodsList(
-        this.items
-      );
+      // 合計額などを計算
+      this.calculateStatuses(this.items);
     } catch (e: any) {
       this.snackBar.open(`エラー: ${e.message}`, 'OK');
     }
@@ -62,12 +65,36 @@ export class GoodsListPageComponent implements OnInit {
       }
     }
 
+    this.snackBar.open('変更を保存しました', undefined, {
+      duration: 1000,
+    });
+
+    // 合計額などを再計算
+    this.calculateStatuses();
+  }
+
+  async calculateStatuses(goodsList?: GoodsListItem[]) {
+    if (!goodsList) {
+      goodsList = await this.goodsListService.getGoodsList();
+    }
+
     this.totalPrice = this.goodsListService.getTotalPriceByGoodsList(
-      await this.goodsListService.getGoodsList()
+      goodsList,
+      this.isShowingArchivedItems
     );
 
-    this.snackBar.open('変更を保存しました', undefined, {
-      duration: 1500,
-    });
+    this.numOfArchivedItems = goodsList.filter(
+      (item) => item.isArchived
+    ).length;
+  }
+
+  async toggleShowingArchive() {
+    this.isShowingArchivedItems = !this.isShowingArchivedItems;
+
+    // 合計額をアップデート
+    this.totalPrice = this.goodsListService.getTotalPriceByGoodsList(
+      await this.goodsListService.getGoodsList(),
+      this.isShowingArchivedItems
+    );
   }
 }
