@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { GoodsListItem } from '../../interfaces/goods-list-item';
 import { GoodsListService } from '../../services/goods-list.service';
+import { GoodsTotalPrice } from '../../interfaces/goods-total-price';
 
 @Component({
   selector: 'app-goods-list-page',
@@ -17,7 +18,10 @@ export class GoodsListPageComponent implements OnInit {
 
   // 総額
   public isShowingTotalPrice = false;
-  public totalPrice = 0;
+  public totalPrice: GoodsTotalPrice = {
+    minPrice: 0,
+    maxPrice: 0,
+  };
 
   // アーカイブしたアイテムを表示するか
   public isShowingArchivedItems = false;

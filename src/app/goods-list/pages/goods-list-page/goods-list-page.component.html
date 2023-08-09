@@ -20,8 +20,23 @@
     </ng-container>
 
     <ng-container *ngIf="isShowingTotalPrice">
-      <span *ngIf="isShowingTotalPrice" class="goods-total-price">
-        {{ totalPrice | currency : "JPY" : true }}
+      <span
+        *ngIf="isShowingTotalPrice"
+        class="goods-total-price"
+        [matTooltip]="
+          totalPrice.minPrice !== totalPrice.maxPrice
+            ? 'チェックを入れた商品の合計額です。ランダム商品があるため、単体購入時とBOX購入時の価格差を表示しています'
+            : 'チェックを入れた商品の合計額です'
+        "
+      >
+        <ng-container *ngIf="totalPrice.minPrice !== totalPrice.maxPrice">
+          {{ totalPrice.minPrice | currency : "JPY" : true }}
+          〜
+          {{ totalPrice.maxPrice | currency : "JPY" : true }}
+        </ng-container>
+        <ng-container *ngIf="totalPrice.minPrice === totalPrice.maxPrice">
+          {{ totalPrice.minPrice | currency : "JPY" : true }}
+        </ng-container>
       </span>
     </ng-container>
   </div>

@@ -6,6 +6,7 @@ import {
   GoodsListItem,
   GoodsListItemSalesStatus,
 } from '../interfaces/goods-list-item';
+import { GoodsTotalPrice } from '../interfaces/goods-total-price';
 
 @Injectable({
   providedIn: 'root',
@@ -50,17 +51,24 @@ export class GoodsListService {
     return await this.injectStatuses(parsed);
   }
 
-  getTotalPriceByGoodsList(items: GoodsListItem[]) {
-    let totalPrice = 0;
+  getTotalPriceByGoodsList(items: GoodsListItem[]): GoodsTotalPrice {
+    let minTotalPrice = 0,
+      maxTotalPrice = 0;
     for (const item of items) {
       if (item.children) {
-        totalPrice += this.getTotalPriceByGoodsList(item.children);
+        let r = this.getTotalPriceByGoodsList(item.children);
+        minTotalPrice += r.minPrice;
+        maxTotalPrice += r.maxPrice;
       } else {
         if (!item.isChecked) continue;
-        totalPrice += item.priceWithTax ?? 0;
+        minTotalPrice += item.priceWithTax ?? 0;
+        maxTotalPrice += item.boxPriceWithTax ?? item.priceWithTax ?? 0;
       }
     }
-    return totalPrice;
+    return {
+      minPrice: minTotalPrice,
+      maxPrice: maxTotalPrice,
+    };
   }
 
   private isItemEndOfSale(item: GoodsListItem) {
@@ -199,8 +207,8 @@ export class GoodsListService {
 
     // 発売日順にソート
     items = items.sort((a, b) => {
-      if (a.saleDate === undefined) return 1;
-      if (b.saleDate === undefined) return -1;
+      if (a.saleDate === undefined) return 0;
+      if (b.saleDate === undefined) return 0;
       return new Date(b.saleDate).getTime() - new Date(a.saleDate).getTime();
     });
 
