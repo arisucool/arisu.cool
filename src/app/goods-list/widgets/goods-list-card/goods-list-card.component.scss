@@ -1,0 +1,109 @@
+// 色 - 予約開始前
+$color-before-reservation: #27ae60;
+// 色 - 予約受付中
+$color-reservation: #27ae60;
+// 色 - 予約終了
+$color-end-of-reservation: #7f8c8d;
+// 色 - 発売前
+$color-before-sale: #1abc9c;
+// 色 - 販売中
+$color-on-sale: #27ae60;
+// 色 - 終売
+$color-end-of-sale: #7f8c8d;
+// 色 - 不明
+$color-unknown: #aaaaaa;
+
+// カード
+mat-card {
+  &.sales-before-reservation {
+    border-left: 0.5rem solid $color-before-reservation;
+  }
+  &.sales-reservation {
+    border-left: 0.5rem solid $color-reservation;
+  }
+  &.sales-end-of-reservation {
+    border-left: 0.5rem solid $color-end-of-reservation;
+  }
+  &.sales-before-sale {
+    border-left: 0.5rem solid $color-before-sale;
+  }
+  &.sales-on-sale {
+    border-left: 0.5rem solid $color-on-sale;
+  }
+  &.sales-end-of-sale {
+    border-left: 0.5rem solid $color-end-of-sale;
+  }
+  &.sales-unknown {
+    border-left: 0.5rem solid $color-unknown;
+  }
+  padding-left: 0.5rem;
+}
+
+// 商品情報 / 商品グループ情報
+
+.item-summary {
+  // 販売ステータス
+  .sales-status {
+    // 予約開始前
+    &.before-reservation {
+      color: $color-before-reservation;
+    }
+    // 予約受付中
+    &.reservation {
+      color: $color-reservation;
+    }
+    // 予約終了
+    &.end-of-reservation {
+      color: $color-end-of-reservation;
+    }
+    // 発売前
+    &.before-sale {
+      color: $color-before-sale;
+    }
+    // 販売中
+    &.on-sale {
+      color: $color-on-sale;
+    }
+    // 終売
+    &.end-of-sale {
+      color: $color-end-of-sale;
+    }
+    // 不明
+    &.unknown {
+      color: $color-unknown;
+    }
+  }
+
+  // 日程
+  .sales-date {
+    margin-left: 1rem;
+    font-weight: bolder;
+  }
+
+  // メーカー
+  .maker {
+    margin-left: 2rem;
+  }
+}
+
+.checklist {
+  display: flex;
+  flex-direction: column;
+  .checklist-item {
+    .price {
+      font-size: 0.8rem;
+    }
+  }
+}
+
+// レスポンシブ
+
+@media screen and (max-width: 768px) {
+  .maker {
+    display: none;
+  }
+  mat-card-content {
+    padding-top: 0.25rem;
+    padding-left: 0;
+  }
+}

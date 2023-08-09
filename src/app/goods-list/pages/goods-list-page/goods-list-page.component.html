@@ -6,48 +6,96 @@
   <p>読み込んでいます...しばらくお待ちください...</p>
 </div>
 
-<div *ngIf="items !== undefined" class="app-card bordered goods-list">
-  <!-- 未完了  -->
-  <mat-list #goodsList>
-    <div mat-subheader>未仕分け・未注文</div>
-    <ng-container *ngFor="let item of items.undone">
-      <app-goods-list-item
+<ng-container *ngIf="items !== undefined">
+  <!-- サマリー -->
+  <div class="goods-total-summary">
+    <ng-container *ngIf="!isShowingTotalPrice">
+      <button
+        mat-icon-button
+        matTooltip="チェックを入れた項目の総額を表示"
+        (click)="this.isShowingTotalPrice = true"
+      >
+        <mat-icon>currency_yen</mat-icon>
+      </button>
+    </ng-container>
+
+    <ng-container *ngIf="isShowingTotalPrice">
+      <span *ngIf="isShowingTotalPrice" class="goods-total-price">
+        {{ totalPrice | currency : "JPY" : true }}
+      </span>
+    </ng-container>
+  </div>
+  <!---->
+
+  <!-- グッズリスト (アーカイブされていないアイテム) -->
+  <div class="goods-cards">
+    <ng-container *ngFor="let item of items">
+      <app-goods-list-card
+        class="goods-card"
         [item]="item"
         (itemChange)="onItemStatusChange(item)"
-      ></app-goods-list-item>
+        *ngIf="item.isArchived === false"
+      ></app-goods-list-card>
     </ng-container>
-  </mat-list>
+  </div>
   <!---->
-</div>
 
-<div *ngIf="items !== undefined" class="app-card bordered goods-list">
-  <!-- 完了  -->
-  <mat-list #goodsList>
-    <div mat-subheader>注文済・見送り済</div>
-    <ng-container *ngFor="let item of items.done">
-      <app-goods-list-item
-        [item]="item"
-        (itemChange)="onItemStatusChange(item)"
-      ></app-goods-list-item>
+  <!-- アーカイブのディバイダ -->
+  <div class="divider" *ngIf="this.isShowingArchivedItems"></div>
+  <!---->
+
+  <!-- アーカイブの表示/非非常ボタン -->
+  <button
+    mat-stroked-button
+    color="primary"
+    style="margin: 2rem 0 1rem 0"
+    [matTooltip]="
+      this.isShowingArchivedItems ? 'アーカイブを非表示' : 'アーカイブを表示'
+    "
+    (click)="this.isShowingArchivedItems = !this.isShowingArchivedItems"
+  >
+    <ng-container *ngIf="this.isShowingArchivedItems">
+      <mat-icon style="vertical-align: middle">expand_less</mat-icon>
+      アーカイブしたグッズを非表示
     </ng-container>
-  </mat-list>
+    <ng-container *ngIf="!this.isShowingArchivedItems">
+      <mat-icon style="vertical-align: middle">expand_more</mat-icon>
+      アーカイブしたグッズを表示
+    </ng-container>
+  </button>
   <!---->
-</div>
 
-<div class="app-card bordered">
+  <!-- グッズリスト (アーカイブされたアイテム) -->
+  <ng-container *ngIf="isShowingArchivedItems">
+    <div class="goods-cards archived-goods-cards">
+      <ng-container *ngFor="let item of items">
+        <app-goods-list-card
+          class="goods-card"
+          [item]="item"
+          (itemChange)="onItemStatusChange(item)"
+          *ngIf="item.isArchived === true"
+        ></app-goods-list-card>
+      </ng-container>
+    </div>
+  </ng-container>
+  <!---->
+</ng-container>
+
+<div class="app-card bordered" style="margin-top: 1rem">
   <p>
     <small>
       ※ 速報性・正確性・網羅性などは保証できません。<br />
       また、予告なく、更新を休止・終了する可能性があります。自己責任でご利用下さい。<br /><br />
-      ※ 変更した内容は、端末内のみに保存されます。<br />ブラウザのキャッシュ消去などで消えることもある為、おまけ程度にご活用ください。<br /><br />
+      ※ 変更した内容は、端末内のみに保存されます。<br />ブラウザのキャッシュ消去などで消えることもある為、おまけ程度にご活用ください。<br />
+      なお、エクスポート機能などは、現在検討中です。<br /><br />
       ※ 新着情報のチェックには、<a
         href="https://twitter.com/arisu_newsfeed"
         target="_blank"
         rel="noopener"
-        >@arisu_newsfeed</a
+        >ニュース・タチバナ</a
       >
       や、<a routerLink="/arisu-calendar">ありすカレンダー</a>
-      もご活用ください。
+      が便利です。
     </small>
   </p>
 </div>

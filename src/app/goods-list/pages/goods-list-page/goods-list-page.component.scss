@@ -1,5 +1,5 @@
 :host {
-  padding: 1.5rem 1rem;
+  padding: 1.5rem 1rem 3rem 1rem;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -11,17 +11,88 @@
   padding: 1rem 1rem 0.75rem 1rem;
 }
 
+// 行
+
+.row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  width: 80vw;
+  max-width: 800px;
+}
+
+// サマリ
+
+.goods-total-summary {
+  background-color: #ffffffdd;
+  border-radius: 3rem;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+  padding: 1rem 1.5rem 1rem 3rem;
+  position: fixed;
+  left: -2rem;
+  bottom: 1rem;
+  z-index: 10;
+
+  .goods-total-price {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #555555;
+    vertical-align: middle;
+    margin-left: 0.25rem;
+  }
+}
+
+// グッズリスト
+
+.goods-cards {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  width: 80vw;
+
+  .goods-card {
+    width: 90vw;
+    max-width: 800px;
+  }
+}
+
 // 小さい文字
 
 small {
   font-size: 0.8rem;
 }
 
+// 罫線
+
+.divider {
+  width: 100%;
+  height: 1px;
+  background-color: #00000022;
+  margin: 2rem 0;
+}
+
 // レスポンシブ
 
 @media screen and (max-width: 768px) {
-  .goods-list {
+  :host {
     padding-left: 0;
     padding-right: 0;
+  }
+
+  .goods-cards {
+    padding-left: 0;
+    padding-right: 0;
+    width: 100vw;
+    .goods-card {
+      width: 95vw;
+    }
+  }
+
+  .goods-total-summary {
+    padding-left: 2rem;
+    padding-right: 0.75rem;
   }
 }

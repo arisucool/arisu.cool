@@ -2,7 +2,10 @@ import { Injectable } from '@angular/core';
 import { kvsIndexedDB, KVSIndexedDB } from '@kvs/indexeddb';
 import { AppCacheService } from 'src/app/shared/services/app-cache.service';
 import { environment } from 'src/environments/environment';
-import { GoodsListItem } from '../interfaces/goods-list-item';
+import {
+  GoodsListItem,
+  GoodsListItemSalesStatus,
+} from '../interfaces/goods-list-item';
 
 @Injectable({
   providedIn: 'root',
@@ -33,8 +36,7 @@ export class GoodsListService {
     );
 
     if (cache) {
-      let items = await this.injectStatuses(cache);
-      return items;
+      return await this.injectStatuses(cache);
     }
 
     const res = await fetch(environment.SHOPPING_LIST_JSON_API_URL);
@@ -43,43 +45,42 @@ export class GoodsListService {
     }
 
     const parsed = await res.json();
+    this.appCacheService.setCachedJson('arisuGoodsList', parsed);
 
-    let items: GoodsListItem[] = [];
-
-    for (const item of parsed) {
-      const id = GoodsListService.getValueByMatchedKey(item, 'id');
-      if (!id || isNaN(id)) {
-        continue;
-      }
-
-      items.push({
-        id: parseInt(id, 10),
-        category: GoodsListService.getValueByMatchedKey(item, 'カテゴリ'),
-        maker: GoodsListService.getValueByMatchedKey(item, 'メーカー'),
-        reservationStartDate: GoodsListService.getValueByMatchedKey(
-          item,
-          '予約開始日'
-        ),
-        name: GoodsListService.getValueByMatchedKey(item, '商品名'),
-        isArisuAlone: GoodsListService.getValueByMatchedKey(
-          item,
-          'ありす単独か'
-        ),
-        releaseDate: GoodsListService.getValueByMatchedKey(item, '発売日'),
-        priceWithTax: GoodsListService.getValueByMatchedKey(item, '税込価格'),
-        place: GoodsListService.getValueByMatchedKey(item, '場所'),
-        url: GoodsListService.getValueByMatchedKey(item, 'URL'),
-        note: GoodsListService.getValueByMatchedKey(item, '補足情報'),
-        isDone: false,
-      });
-    }
-    this.appCacheService.setCachedJson('arisuGoodsList', items);
-
-    items = await this.injectStatuses(items);
-    return items;
+    return await this.injectStatuses(parsed);
   }
 
-  async setItemStatus(itemId: number, isDone: boolean) {
+  getTotalPriceByGoodsList(items: GoodsListItem[]) {
+    let totalPrice = 0;
+    for (const item of items) {
+      if (item.children) {
+        totalPrice += this.getTotalPriceByGoodsList(item.children);
+      } else {
+        if (!item.isChecked) continue;
+        totalPrice += item.priceWithTax ?? 0;
+      }
+    }
+    return totalPrice;
+  }
+
+  private isItemEndOfSale(item: GoodsListItem) {
+    if (!item.endOfSaleDate && !item.confirmedEndOfSaleDate) return false;
+
+    const now = new Date();
+    const endOfSaleDate = item.endOfSaleDate
+      ? new Date(item.endOfSaleDate)
+      : undefined;
+    const confirmedEndOfSaleDate = item.confirmedEndOfSaleDate
+      ? new Date(item.confirmedEndOfSaleDate)
+      : undefined;
+
+    if (endOfSaleDate && endOfSaleDate < now) return true;
+    if (confirmedEndOfSaleDate && confirmedEndOfSaleDate < now) return true;
+
+    return false;
+  }
+
+  async setItemStatus(itemId: number, isChecked: boolean, isArchived: boolean) {
     await this.init();
     if (!this.storage) {
       throw new Error('Failed to init storage');
@@ -88,22 +89,119 @@ export class GoodsListService {
 
     this.storage.set(itemId.toString(), {
       note: undefined,
-      isDone: isDone,
+      isChecked: isChecked,
+      isArchived: isArchived,
     });
   }
 
-  private async injectStatuses(items: GoodsListItem[]) {
+  getItemSalesStatus(item: GoodsListItem): GoodsListItemSalesStatus {
+    let isEndOfSale = this.isItemEndOfSale(item);
+
+    let salesStatus = GoodsListItemSalesStatus.UNKNOWN;
+
+    if (isEndOfSale) {
+      // 終売とする
+      salesStatus = GoodsListItemSalesStatus.END_OF_SALE;
+    } else {
+      const now = new Date();
+
+      // 予約開始日を取得
+      const reservationStartDate = item.reservationStartDate;
+      if (reservationStartDate) {
+        const reservationStartDateDate = new Date(reservationStartDate);
+        if (reservationStartDateDate > now) {
+          // 予約開始前
+          salesStatus = GoodsListItemSalesStatus.BEFORE_RESERVATION;
+        } else {
+          // 予約受付中
+          salesStatus = GoodsListItemSalesStatus.RESERVATION;
+        }
+      }
+
+      // 予約締切日を取得
+      const reservationEndDate = item.reservationEndDate;
+      if (reservationEndDate) {
+        const reservationEndDateDate = new Date(reservationEndDate);
+        if (reservationEndDateDate < now) {
+          // 予約終了
+          salesStatus = GoodsListItemSalesStatus.END_OF_RESERVATION;
+        }
+      }
+
+      // 発売日を取得
+      const saleDate = item.saleDate;
+      if (saleDate) {
+        const saleDateDate = new Date(saleDate);
+        if (saleDateDate > now) {
+          // 発売前
+          salesStatus = GoodsListItemSalesStatus.BEFORE_SALE;
+        } else {
+          // 販売中
+          salesStatus = GoodsListItemSalesStatus.ON_SALE;
+        }
+      }
+
+      // 終売日を取得
+      const endOfSaleDate = item.endOfSaleDate;
+      if (endOfSaleDate) {
+        const endOfSaleDateDate = new Date(endOfSaleDate);
+        if (endOfSaleDateDate < now) {
+          // 終売
+          salesStatus = GoodsListItemSalesStatus.END_OF_SALE;
+        }
+      }
+    }
+
+    return salesStatus;
+  }
+
+  private async injectStatuses(rawItems: GoodsListItem[]) {
+    let items: GoodsListItem[] = [];
+
+    for (const rawItem of rawItems) {
+      if (!rawItem || isNaN(rawItem.id)) {
+        continue;
+      }
+
+      // 子項目を処理
+      if (rawItem.children) {
+        rawItem.children = await this.injectStatuses(rawItem.children);
+      }
+
+      // 項目を追加
+      items.push({
+        ...rawItem,
+        salesStatus: this.getItemSalesStatus(rawItem),
+        isChecked: false,
+        isArchived: false,
+      });
+    }
+
     for (const item of items) {
       const status = await this.storage?.get(item.id.toString());
-      const isDone = status ? status['isDone'] : false;
-      item.isDone = isDone;
+
+      const isChecked = status ? status['isChecked'] : false;
+      item.isChecked = isChecked;
+
+      const isArchived = status ? status['isArchived'] : false;
+      item.isArchived = isArchived;
     }
 
     // 予約開始日順にソート
-    items.sort((a, b) => {
+    items = items.sort((a, b) => {
       if (a.reservationStartDate === undefined) return 1;
       if (b.reservationStartDate === undefined) return -1;
-      return a.reservationStartDate.localeCompare(b.reservationStartDate);
+      return (
+        new Date(b.reservationStartDate).getTime() -
+        new Date(a.reservationStartDate).getTime()
+      );
+    });
+
+    // 発売日順にソート
+    items = items.sort((a, b) => {
+      if (a.saleDate === undefined) return 1;
+      if (b.saleDate === undefined) return -1;
+      return new Date(b.saleDate).getTime() - new Date(a.saleDate).getTime();
     });
 
     return items;

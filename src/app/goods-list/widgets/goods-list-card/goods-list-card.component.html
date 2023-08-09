@@ -1,0 +1,192 @@
+<mat-card
+  [ngClass]="{
+    'sales-before-reservation': item.salesStatus === salesStatus.BEFORE_RESERVATION,
+    'sales-reservation': item.salesStatus === salesStatus.RESERVATION,
+    'sales-end-of-reservation': item.salesStatus === salesStatus.END_OF_RESERVATION,
+    'sales-before-sale': item.salesStatus === salesStatus.BEFORE_SALE,
+    'sales-on-sale': item.salesStatus === salesStatus.ON_SALE,
+    'sales-end-of-sale': item.salesStatus === salesStatus.END_OF_SALE,
+    'sales-unknown': item.salesStatus === salesStatus.UNKNOWN,
+  }"
+>
+  <mat-card-header>
+    <!-- 商品名 / 商品グループ名) -->
+    <mat-card-title> {{ item.name }}</mat-card-title>
+    <!---->
+    <!-- 商品情報 / 商品グループ情報 )-->
+    <mat-card-subtitle class="item-summary">
+      <!-- 発売状態 (予約開始前) -->
+      <ng-container *ngIf="item.salesStatus === salesStatus.BEFORE_RESERVATION">
+        <span class="sales-status before-reservation"> 予約開始前 </span>
+        <span
+          class="sales-date"
+          matTooltip="このグッズの予約開始日"
+          *ngIf="item.reservationStartDate"
+        >
+          {{ item.reservationStartDate | date : "yyyy/MM/dd" }} から
+        </span>
+      </ng-container>
+      <!---->
+      <!-- 発売状態 (予約受付中) -->
+      <ng-container *ngIf="item.salesStatus === salesStatus.RESERVATION">
+        <span class="sales-status reservation"> 予約受付中 </span>
+        <span
+          class="sales-date"
+          matTooltip="このグッズの予約締切日"
+          *ngIf="item.reservationEndDate"
+        >
+          {{ item.reservationEndDate | date : "yyyy/MM/dd" }} まで
+        </span>
+      </ng-container>
+      <!---->
+      <!-- 発売状態 (予約終了) -->
+      <ng-container *ngIf="item.salesStatus === salesStatus.END_OF_RESERVATION">
+        <span class="sales-status end-of-reservation"> 予約終了 </span>
+      </ng-container>
+      <!---->
+      <!-- 発売状態 (発売前) -->
+      <ng-container *ngIf="item.salesStatus === salesStatus.BEFORE_SALE">
+        <span class="sales-status before-sale"> 発売前 </span>
+        <span class="sales-date" matTooltip="このグッズの発売日">
+          {{ item.saleDate | date : "yyyy/MM/dd" }} から
+        </span>
+      </ng-container>
+      <!---->
+      <!-- 発売状態 (販売中) -->
+      <ng-container *ngIf="item.salesStatus === salesStatus.ON_SALE">
+        <span class="sales-status on-sale"> 販売中 </span>
+      </ng-container>
+      <!---->
+      <!-- 発売状態 (終売) -->
+      <ng-container *ngIf="item.salesStatus === salesStatus.END_OF_SALE">
+        <span class="sales-status end-of-sale"> 終売 </span>
+      </ng-container>
+      <!---->
+      <!-- 発売状態 (不明) -->
+      <ng-container *ngIf="item.salesStatus === salesStatus.UNKNOWN">
+        <span class="sales-status unknown"> 不明 </span>
+      </ng-container>
+      <!---->
+
+      <!-- メーカー -->
+      <span class="maker">
+        {{ item.maker || "-" }}
+      </span>
+      <!---->
+    </mat-card-subtitle>
+    <!---->
+  </mat-card-header>
+  <mat-card-content>
+    <!-- チェックリスト -->
+    <div class="checklist">
+      <!-- 子アイテムがある場合 -->
+      <ng-container *ngIf="item.children && item.children.length >= 1">
+        <ng-container *ngFor="let child of item.children">
+          <mat-checkbox
+            class="checklist-item"
+            [(ngModel)]="child.isChecked"
+            (ngModelChange)="itemChange.emit(item)"
+          >
+            {{ child.name }}
+            &nbsp;&nbsp;
+            <span class="price" *ngIf="child.priceWithTax">
+              ￥{{ child.priceWithTax | number }}
+            </span>
+            <span
+              class="price"
+              *ngIf="child.boxPriceWithTax"
+              matTooltip="このグッズはBOX販売があります"
+            >
+              〜 {{ child.boxPriceWithTax | number }}
+            </span>
+          </mat-checkbox>
+        </ng-container>
+      </ng-container>
+      <!---->
+
+      <!-- 子アイテムがない場合 -->
+      <ng-container *ngIf="!item.children || item.children.length == 1">
+        <mat-checkbox
+          class="checklist-item"
+          [(ngModel)]="item.isChecked"
+          (ngModelChange)="itemChange.emit(item)"
+        >
+          {{ item.name }}
+          &nbsp;&nbsp;
+          <span class="price" *ngIf="item.priceWithTax">
+            ￥{{ item.priceWithTax | number }}
+          </span>
+          <span
+            class="price"
+            *ngIf="item.boxPriceWithTax"
+            matTooltip="このグッズはBOX販売があります"
+          >
+            〜 {{ item.boxPriceWithTax | number }}
+          </span>
+        </mat-checkbox>
+      </ng-container>
+      <!---->
+    </div>
+    <!---->
+  </mat-card-content>
+  <mat-card-actions
+    style="
+      display: flex;
+      justify-content: end;
+      gap: 1rem;
+      width: 100%;
+      padding-top: 0;
+    "
+  >
+    <!-- リンクボタン -->
+    <a
+      mat-icon-button
+      color="primary"
+      matTooltip="参考ページを開く"
+      [href]="item.url"
+      [disabled]="!item.url"
+      target="_blank"
+      rel="noopener"
+    >
+      <mat-icon style="margin-bottom: 3px">link</mat-icon>
+    </a>
+    <!---->
+
+    <div style="flex-grow: 1"></div>
+
+    <!-- 一括チェックボタン -->
+    <button
+      mat-icon-button
+      [matTooltip]="
+        isAllChecked() ? '全てのチェックを外す' : '全てのチェックを入れる'
+      "
+      [color]="isAllChecked() ? 'accent' : ''"
+      (click)="toggleAllChecks(); itemChange.emit(item)"
+    >
+      <mat-icon *ngIf="isAllChecked()">check_box</mat-icon>
+      <mat-icon *ngIf="!isAllChecked()">check_box_outline_blank</mat-icon>
+    </button>
+    <!---->
+
+    <!-- アーカイブボタン -->
+    <button
+      mat-icon-button
+      color="primary"
+      matTooltip="アーカイブする"
+      (click)="item.isArchived = true; itemChange.emit(item)"
+      *ngIf="!item.isArchived"
+    >
+      <mat-icon>archive</mat-icon>
+    </button>
+    <button
+      mat-icon-button
+      color="primary"
+      matTooltip="アーカイブを解除する"
+      (click)="item.isArchived = false; itemChange.emit(item)"
+      *ngIf="item.isArchived"
+    >
+      <mat-icon>unarchive</mat-icon>
+    </button>
+    <!---->
+  </mat-card-actions>
+</mat-card>
