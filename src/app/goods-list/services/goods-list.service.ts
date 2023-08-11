@@ -96,7 +96,12 @@ export class GoodsListService {
     return false;
   }
 
-  async setItemStatus(itemId: number, isChecked: boolean, isArchived: boolean) {
+  async setItemStatus(
+    itemId: number,
+    isChecked: boolean,
+    isArchived: boolean,
+    paymentYearMonth: string
+  ) {
     await this.init();
     if (!this.storage) {
       throw new Error('Failed to init storage');
@@ -107,6 +112,7 @@ export class GoodsListService {
       note: undefined,
       isChecked: isChecked,
       isArchived: isArchived,
+      paymentYearMonth: paymentYearMonth,
     });
   }
 
@@ -179,6 +185,42 @@ export class GoodsListService {
         continue;
       }
 
+      // 販売ステータスを取得
+      const salesStatus = this.getItemSalesStatus(rawItem);
+
+      // 推定支払い時期を取得
+      let estimatedPaymentYearMonth = rawItem.estimatedPaymentYearMonth;
+      if (!estimatedPaymentYearMonth) {
+        // 推定支払い時期が不明ならば
+        if (
+          rawItem.salesStatus === GoodsListItemSalesStatus.BEFORE_RESERVATION &&
+          rawItem.reservationStartDate
+        ) {
+          // 予約開始前なら、予約開始日を設定
+          estimatedPaymentYearMonth = rawItem.reservationStartDate;
+        } else if (
+          rawItem.salesStatus === GoodsListItemSalesStatus.RESERVATION &&
+          rawItem.reservationEndDate
+        ) {
+          // 予約受付中なら、予約締切日を設定
+          estimatedPaymentYearMonth = rawItem.reservationEndDate;
+        } else if (
+          rawItem.salesStatus === GoodsListItemSalesStatus.BEFORE_SALE &&
+          rawItem.saleDate
+        ) {
+          // 発売前なら、発売日を設定
+          estimatedPaymentYearMonth = rawItem.saleDate;
+        }
+      }
+
+      if (!estimatedPaymentYearMonth) {
+        // 推定支払い時期をまだ特定できなかった場合は、現在の年月を設定
+        estimatedPaymentYearMonth = new Date()
+          .toISOString()
+          .replace(/-/g, '/')
+          .slice(0, 7);
+      }
+
       // 子項目を処理
       if (rawItem.children) {
         rawItem.children = await this.injectStatuses(rawItem.children);
@@ -187,7 +229,8 @@ export class GoodsListService {
       // 項目を追加
       items.push({
         ...rawItem,
-        salesStatus: this.getItemSalesStatus(rawItem),
+        salesStatus: salesStatus,
+        estimatedPaymentYearMonth: estimatedPaymentYearMonth,
         isChecked: false,
         isArchived: false,
       });
@@ -201,6 +244,9 @@ export class GoodsListService {
 
       const isArchived = status ? status['isArchived'] : false;
       item.isArchived = isArchived;
+
+      const selectedPaymentYearMonth = status ? status['paymentYearMonth'] : '';
+      item.selectedPaymentYearMonth = selectedPaymentYearMonth;
     }
 
     // 予約開始日順にソート
@@ -221,21 +267,5 @@ export class GoodsListService {
     });
 
     return items;
-  }
-
-  static getValueByMatchedKey(jsonObject: any, key: string) {
-    const expectedKey = key.toLowerCase();
-
-    const keys = Object.keys(jsonObject);
-    for (const k of keys) {
-      if (k.toLowerCase().indexOf(expectedKey) === 0) {
-        let v = jsonObject[k];
-        if (v === undefined || v.trim() === '' || v === '-') {
-          return undefined;
-        }
-        return jsonObject[k];
-      }
-    }
-    return undefined;
   }
 }

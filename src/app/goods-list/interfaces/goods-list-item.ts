@@ -48,6 +48,12 @@ export interface GoodsListItem {
   priceWithTax?: number;
   boxPriceWithTax?: number;
 
+  // 推定支払い時期
+  estimatedPaymentYearMonth: string;
+
+  // 選択された支払い時期
+  selectedPaymentYearMonth?: string;
+
   // 場所
   place?: string;
   // 補足情報

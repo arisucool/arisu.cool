@@ -50,17 +50,25 @@ export class GoodsListPageComponent implements OnInit {
   }
 
   async onItemStatusChange(item: GoodsListItem) {
+    // 支払い時期の設定
+    let paymentYearMonth =
+      item.selectedPaymentYearMonth ?? item.estimatedPaymentYearMonth;
+
+    // ステータスを保存
     await this.goodsListService.setItemStatus(
       item.id,
       item.isChecked,
-      item.isArchived
+      item.isArchived,
+      paymentYearMonth
     );
+
     if (item.children) {
       for (const child of item.children) {
         await this.goodsListService.setItemStatus(
           child.id,
           child.isChecked,
-          false
+          false,
+          paymentYearMonth
         );
       }
     }

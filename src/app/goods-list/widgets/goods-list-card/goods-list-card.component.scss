@@ -86,6 +86,8 @@ mat-card {
   }
 }
 
+// チェックリスト
+
 .checklist {
   display: flex;
   flex-direction: column;
@@ -93,6 +95,34 @@ mat-card {
     .price {
       font-size: 0.8rem;
     }
+  }
+}
+
+// 支払いタイミングボタン
+
+.payment-timing-button {
+  position: relative;
+
+  mat-icon.main {
+    position: relative;
+    line-height: 1rem;
+  }
+
+  mat-icon.arrow {
+    position: absolute;
+    top: 0.7rem;
+    right: -0.4rem;
+    line-height: 1.2rem;
+    opacity: 0.8;
+  }
+
+  .payment-year-month {
+    position: absolute;
+    font-size: 0.8rem;
+    bottom: 0.2rem;
+    left: 0;
+    right: 0;
+    text-align: center;
   }
 }
 

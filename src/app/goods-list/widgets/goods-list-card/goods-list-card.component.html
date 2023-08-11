@@ -168,6 +168,65 @@
     </button>
     <!---->
 
+    <!-- 支払い時期ボタン -->
+    <button
+      class="payment-timing-button"
+      mat-icon-button
+      color="primary"
+      [matMenuTriggerFor]="paymentYearMonthMenu"
+      [matTooltip]="
+        item.selectedPaymentYearMonth
+          ? '月ごとの合計金額を計算できます。このグッズの支払い時期は ' +
+            item.selectedPaymentYearMonth +
+            ' に設定されています。変更する場合は、ここをクリックしてください。'
+          : '月ごとの合計金額を計算できます。このグッズの推測される支払い時期は' +
+            item.estimatedPaymentYearMonth +
+            'です。　　　ただし、保証するものではなく、支払い方法、店舗、販売の種類によっても異なる可能性があります。その場合はここをクリックして、年月を選んでください。'
+      "
+    >
+      <mat-icon class="main">currency_yen</mat-icon>
+      <mat-icon class="arrow">arrow_drop_down</mat-icon>
+
+      <ng-container *ngIf="this.item.selectedPaymentYearMonth">
+        <span class="payment-year-month selected">
+          {{ this.item.selectedPaymentYearMonth }}
+        </span>
+      </ng-container>
+      <ng-container
+        *ngIf="
+          !this.item.selectedPaymentYearMonth &&
+          this.item.estimatedPaymentYearMonth
+        "
+      >
+        <span class="payment-year-month estimated">
+          {{ this.item.estimatedPaymentYearMonth }}
+        </span>
+      </ng-container>
+    </button>
+    <!---->
+
+    <!-- 支払い時期メニュー -->
+    <mat-menu #paymentYearMonthMenu="matMenu">
+      <ng-container *ngFor="let selection of this.paymentYearMonths">
+        <button
+          mat-menu-item
+          (click)="
+            this.item.selectedPaymentYearMonth = selection.yearMonth;
+            itemChange.emit(item)
+          "
+          [disabled]="
+            (this.item.selectedPaymentYearMonth &&
+              this.item.selectedPaymentYearMonth == selection.yearMonth) ||
+            (!this.item.selectedPaymentYearMonth &&
+              this.item.estimatedPaymentYearMonth == selection.yearMonth)
+          "
+        >
+          {{ selection.label }}
+        </button>
+      </ng-container>
+    </mat-menu>
+    <!---->
+
     <!-- アーカイブボタン -->
     <button
       mat-icon-button
