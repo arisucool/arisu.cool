@@ -1,0 +1,16 @@
+<mat-dialog-content>
+  <app-goods-payment-report
+    [isIncludeArchiveItems]="this.isIncludeArchiveItems"
+  >
+  </app-goods-payment-report>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <!-- アーカイブ済みを含むボタン -->
+  <mat-checkbox [(ngModel)]="isIncludeArchiveItems"
+    >アーカイブ済みを含める</mat-checkbox
+  >
+  <!---->
+
+  <span style="flex: 1 1 auto"></span>
+  <button mat-dialog-close mat-stroked-button color="primary">OK</button>
+</mat-dialog-actions>

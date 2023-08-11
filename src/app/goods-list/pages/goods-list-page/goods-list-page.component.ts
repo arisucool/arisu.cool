@@ -3,6 +3,8 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { GoodsListItem } from '../../interfaces/goods-list-item';
 import { GoodsListService } from '../../services/goods-list.service';
 import { GoodsTotalPrice } from '../../interfaces/goods-total-price';
+import { MatDialog } from '@angular/material/dialog';
+import { GoodsPaymentReportDialogComponent } from '../../widgets/goods-payment-report-dialog/goods-payment-report-dialog.component';
 
 @Component({
   selector: 'app-goods-list-page',
@@ -31,7 +33,8 @@ export class GoodsListPageComponent implements OnInit {
 
   constructor(
     public goodsListService: GoodsListService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private matDialog: MatDialog
   ) {}
 
   async ngOnInit() {
@@ -104,5 +107,11 @@ export class GoodsListPageComponent implements OnInit {
       await this.goodsListService.getGoodsList(),
       this.isShowingArchivedItems
     );
+  }
+
+  openPaymentReportDialog() {
+    this.matDialog.open(GoodsPaymentReportDialogComponent, {
+      maxWidth: '96vw',
+    });
   }
 }

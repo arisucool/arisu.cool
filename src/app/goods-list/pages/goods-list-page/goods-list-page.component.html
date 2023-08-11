@@ -28,7 +28,7 @@
             ? 'アーカイブされたグッズも含め、チェックを入れた商品の合計額です。'
             : 'チェックを入れた商品の合計額です。') +
           (totalPrice.minPrice !== totalPrice.maxPrice
-            ? 'ランダム商品があるため、単体購入時とBOX購入時の価格差を表示しています'
+            ? 'ランダム商品があるため、単体購入時とBOX購入時相当の価格差を表示しています'
             : '')
         "
       >
@@ -42,6 +42,18 @@
         </ng-container>
       </span>
     </ng-container>
+  </div>
+  <!---->
+
+  <!-- 支払いレポートの表示ボタン -->
+  <div class="goods-payment-report">
+    <button
+      mat-icon-button
+      matTooltip="チェックを入れた項目について、年月ごとの支払い額を表示"
+      (click)="this.openPaymentReportDialog()"
+    >
+      <mat-icon>receipt_long</mat-icon>
+    </button>
   </div>
   <!---->
 
@@ -62,7 +74,7 @@
   <div class="divider" *ngIf="this.isShowingArchivedItems"></div>
   <!---->
 
-  <!-- アーカイブの表示/非非常ボタン -->
+  <!-- アーカイブの表示/非表示ボタン -->
   <button
     mat-stroked-button
     color="primary"
