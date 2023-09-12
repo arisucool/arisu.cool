@@ -7,9 +7,16 @@ import { SharedModule } from '../shared/shared.module';
 import { GoodsListCardComponent } from './widgets/goods-list-card/goods-list-card.component';
 import { GoodsPaymentReportComponent } from './widgets/goods-payment-report/goods-payment-report.component';
 import { GoodsPaymentReportDialogComponent } from './widgets/goods-payment-report-dialog/goods-payment-report-dialog.component';
+import { GoodsListItemEditDialogComponent } from './widgets/goods-list-item-edit-dialog/goods-list-item-edit-dialog.component';
 
 @NgModule({
-  declarations: [GoodsListPageComponent, GoodsListCardComponent, GoodsPaymentReportComponent, GoodsPaymentReportDialogComponent],
+  declarations: [
+    GoodsListPageComponent,
+    GoodsListCardComponent,
+    GoodsPaymentReportComponent,
+    GoodsPaymentReportDialogComponent,
+    GoodsListItemEditDialogComponent,
+  ],
   imports: [CommonModule, GoodsListRoutingModule, SharedModule],
 })
 export class GoodsListModule {}

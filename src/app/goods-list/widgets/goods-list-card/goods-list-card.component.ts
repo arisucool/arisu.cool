@@ -3,6 +3,9 @@ import {
   GoodsListItem,
   GoodsListItemSalesStatus,
 } from '../../interfaces/goods-list-item';
+import { MatDialog } from '@angular/material/dialog';
+import { GoodsListItemEditDialogComponent } from '../goods-list-item-edit-dialog/goods-list-item-edit-dialog.component';
+import { lastValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-goods-list-card',
@@ -25,6 +28,8 @@ export class GoodsListCardComponent implements OnInit {
     label: string;
     subLabel?: string;
   }[] = [];
+
+  constructor(private matDialog: MatDialog) {}
 
   ngOnInit() {
     this.init();
@@ -97,5 +102,42 @@ export class GoodsListCardComponent implements OnInit {
     const date = new Date(dateString);
     const isPast = date.getTime() < Date.now();
     return isPast;
+  }
+
+  async openEditDialog(item: GoodsListItem, isChild = false) {
+    const item_ = { ...item };
+
+    if (item_.customQuantity === undefined) {
+      item_.customQuantity = 1;
+    }
+    if (item_.customPriceWithTax === undefined) {
+      item_.customPriceWithTax = item_.priceWithTax;
+    }
+
+    const dialogRef = this.matDialog.open(GoodsListItemEditDialogComponent, {
+      data: {
+        item: item_,
+      },
+    });
+    const result = await lastValueFrom(dialogRef.afterClosed());
+    if (result && result === 'OK') {
+      if (isChild && this.item.children) {
+        this.item.children = this.item.children.map((child) => {
+          if (child.id === item.id) {
+            return item_;
+          }
+          return child;
+        });
+        this.itemChange.emit(this.item);
+      } else {
+        if (item_.customQuantity !== undefined) {
+          this.item.customQuantity = item_.customQuantity;
+        }
+        if (item_.customPriceWithTax !== undefined) {
+          this.item.customPriceWithTax = item_.customPriceWithTax;
+        }
+        this.itemChange.emit(this.item);
+      }
+    }
   }
 }

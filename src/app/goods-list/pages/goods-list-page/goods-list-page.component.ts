@@ -59,12 +59,16 @@ export class GoodsListPageComponent implements OnInit {
         ? item.selectedPaymentYearMonth
         : item.estimatedPaymentYearMonth;
 
+    console.log(item.customQuantity, item.customPriceWithTax);
+
     // ステータスを保存
     await this.goodsListService.setItemStatus(
       item.id,
       item.isChecked,
       item.isArchived,
-      paymentYearMonth
+      paymentYearMonth,
+      item.customQuantity,
+      item.customPriceWithTax
     );
 
     if (item.children) {
@@ -73,7 +77,9 @@ export class GoodsListPageComponent implements OnInit {
           child.id,
           child.isChecked,
           item.isArchived,
-          paymentYearMonth
+          paymentYearMonth,
+          child.customQuantity,
+          child.customPriceWithTax
         );
       }
     }

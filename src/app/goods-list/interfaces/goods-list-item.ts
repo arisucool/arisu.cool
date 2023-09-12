@@ -54,6 +54,12 @@ export interface GoodsListItem {
   priceWithTax?: number;
   boxPriceWithTax?: number;
 
+  // 税込価格 (カスタム)
+  customPriceWithTax?: number;
+
+  // 購入個数 (カスタム)
+  customQuantity?: number;
+
   // 推定支払い時期
   estimatedPaymentYearMonth: string;
 

@@ -98,12 +98,18 @@ export class GoodsPaymentReportComponent implements OnInit {
         items,
         this.isIncludeArchiveItems
       );
+
+      let totalQuantity = 0;
+      for (const item of items) {
+        totalQuantity += item.customQuantity ?? 1;
+      }
+
       this.paymentReports.push({
         yearMonth: yearMonth,
         minPrice: totalPrice.minPrice,
         maxPrice: totalPrice.maxPrice,
         goods: items,
-        numOfGoods: items.length,
+        numOfGoods: totalQuantity,
       });
     }
   }

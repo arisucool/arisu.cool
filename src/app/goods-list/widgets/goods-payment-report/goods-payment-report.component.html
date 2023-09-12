@@ -17,7 +17,7 @@
       {{ element.minPrice | currency : "JPY" : "symbol" }}
       <span
         *ngIf="element.maxPrice && element.maxPrice != element.minPrice"
-        matTooltip="この年月はランダム商品があるため、単体購入時とBOX購入時相当の価格差を表示しています"
+        matTooltip="この年月はランダム商品等があるため、単体購入時とBOX購入時相当の価格差を表示しています"
       >
         〜
         {{ element.maxPrice | currency : "JPY" : "symbol" }}
@@ -27,7 +27,7 @@
 
   <!-- グッズ数 -->
   <ng-container matColumnDef="numOfGoods">
-    <th mat-header-cell *matHeaderCellDef>数</th>
+    <th mat-header-cell *matHeaderCellDef>購入数</th>
     <td mat-cell *matCellDef="let element">{{ element.numOfGoods }}</td>
   </ng-container>
 
@@ -69,18 +69,39 @@
             <!-- グッズ (子アイテムがない場合) -->
             <ng-container *ngIf="!item.children">
               <li>
+                <!-- アイテムの名前 -->
                 {{ item.name }}
+                <!---->
+
                 &nbsp;&nbsp;
-                <span class="price" *ngIf="item.priceWithTax">
-                  {{ item.priceWithTax | currency : "JPY" : "symbol" }}
-                </span>
-                <span
-                  class="price"
-                  *ngIf="item.boxPriceWithTax"
-                  matTooltip="単体購入時とBOX購入時相当の価格差を表示しています"
-                >
-                  〜 {{ item.boxPriceWithTax | currency : "JPY" : "symbol" }}
-                </span>
+
+                <!-- 価格 -->
+                <ng-container *ngIf="item.customPriceWithTax">
+                  <span class="price">
+                    {{ item.customPriceWithTax | currency : "JPY" : "symbol" }}
+                  </span>
+
+                  <span
+                    class="quantity"
+                    *ngIf="item.customQuantity && item.customQuantity !== 1"
+                  >
+                    x {{ item.customQuantity }}
+                  </span>
+                </ng-container>
+
+                <ng-container *ngIf="!item.customPriceWithTax">
+                  <span class="price" *ngIf="item.priceWithTax">
+                    {{ item.priceWithTax | currency : "JPY" : "symbol" }}
+                  </span>
+                  <span
+                    class="price"
+                    *ngIf="item.boxPriceWithTax"
+                    matTooltip="単体購入時とBOX購入時相当の価格差を表示しています"
+                  >
+                    〜 {{ item.boxPriceWithTax | currency : "JPY" : "symbol" }}
+                  </span>
+                </ng-container>
+                <!---->
               </li>
             </ng-container>
             <!---->
@@ -88,25 +109,53 @@
             <!-- グッズ (子アイテムがある場合) -->
             <ng-container *ngIf="item.children">
               <li>
+                <!-- 親アイテムの名前 -->
                 {{ item.name }}
+                <!---->
+
                 <ul>
                   <ng-container *ngFor="let child of item.children">
                     <li>
+                      <!-- 子アイテムの名前 -->
                       {{ child.name }}
+                      <!---->
                       &nbsp;&nbsp;
-                      <span class="price" *ngIf="child.priceWithTax">
-                        {{ child.priceWithTax | currency : "JPY" : "symbol" }}
-                      </span>
-                      <span
-                        class="price"
-                        *ngIf="child.boxPriceWithTax"
-                        matTooltip="単体購入時とBOX購入時相当の価格差を表示しています"
-                      >
-                        〜
-                        {{
-                          child.boxPriceWithTax | currency : "JPY" : "symbol"
-                        }}
-                      </span>
+
+                      <!-- 価格 -->
+                      <ng-container *ngIf="child.customPriceWithTax">
+                        <span class="price">
+                          {{
+                            child.customPriceWithTax
+                              | currency : "JPY" : "symbol"
+                          }}
+                        </span>
+
+                        <span
+                          class="quantity"
+                          *ngIf="
+                            child.customQuantity && child.customQuantity !== 1
+                          "
+                        >
+                          x {{ child.customQuantity }}
+                        </span>
+                      </ng-container>
+
+                      <ng-container *ngIf="!child.customPriceWithTax">
+                        <span class="price" *ngIf="child.priceWithTax">
+                          {{ child.priceWithTax | currency : "JPY" : "symbol" }}
+                        </span>
+                        <span
+                          class="price"
+                          *ngIf="child.boxPriceWithTax"
+                          matTooltip="単体購入時とBOX購入時相当の価格差を表示しています"
+                        >
+                          〜
+                          {{
+                            child.boxPriceWithTax | currency : "JPY" : "symbol"
+                          }}
+                        </span>
+                      </ng-container>
+                      <!---->
                     </li>
                   </ng-container>
                 </ul>

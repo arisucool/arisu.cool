@@ -6,6 +6,7 @@ import {
   GoodsListItem,
   GoodsListItemSalesStatus,
 } from '../interfaces/goods-list-item';
+import { GoodsListItemStatus } from '../interfaces/goods-list-item-status';
 import { GoodsTotalPrice } from '../interfaces/goods-total-price';
 import * as PapaParse from 'papaparse';
 
@@ -128,6 +129,8 @@ export class GoodsListService {
           'name',
           'priceWithTax',
           'boxPriceWithTax',
+          'customPriceWithTax',
+          'customQuantity',
           'paymentYearMonth',
           'salesStatus',
           'isChecked',
@@ -162,8 +165,14 @@ export class GoodsListService {
         maxTotalPrice += r.maxPrice;
       } else {
         if (!item.isChecked) continue;
-        minTotalPrice += item.priceWithTax ?? 0;
-        maxTotalPrice += item.boxPriceWithTax ?? item.priceWithTax ?? 0;
+
+        if (item.customPriceWithTax !== undefined) {
+          minTotalPrice += item.customPriceWithTax * (item.customQuantity ?? 1);
+          maxTotalPrice += item.customPriceWithTax * (item.customQuantity ?? 1);
+        } else {
+          minTotalPrice += item.priceWithTax ?? 0;
+          maxTotalPrice += item.boxPriceWithTax ?? item.priceWithTax ?? 0;
+        }
       }
     }
     return {
@@ -209,7 +218,9 @@ export class GoodsListService {
     itemId: number,
     isChecked: boolean,
     isArchived: boolean,
-    paymentYearMonth: string
+    paymentYearMonth: string,
+    customQuantity: number = 1,
+    customPriceWithTax?: number
   ) {
     await this.init();
     if (!this.storage) {
@@ -217,19 +228,25 @@ export class GoodsListService {
       return;
     }
 
-    const prevStatus = await this.storage.get(itemId.toString());
+    const prevStatus: GoodsListItemStatus | undefined = await this.storage.get(
+      itemId.toString()
+    );
     const firstCheckedAt = prevStatus
       ? prevStatus['firstCheckedAt']
       : new Date().toISOString();
 
-    this.storage.set(itemId.toString(), {
+    const status: GoodsListItemStatus = {
       note: undefined,
       isChecked: isChecked,
       isArchived: isArchived,
       paymentYearMonth: paymentYearMonth,
       savedAt: new Date().toISOString(),
       firstCheckedAt: firstCheckedAt,
-    });
+      customPriceWithTax: customPriceWithTax,
+      customQuantity: customQuantity,
+    };
+
+    this.storage.set(itemId.toString(), status);
   }
 
   private async injectStatuses(
@@ -272,7 +289,17 @@ export class GoodsListService {
     }
 
     for (const item of items) {
-      const status = await this.storage?.get(item.id.toString());
+      const status: GoodsListItemStatus | undefined = await this.storage?.get(
+        item.id.toString()
+      );
+
+      const customPriceWithTax = status
+        ? status['customPriceWithTax']
+        : undefined;
+      item.customPriceWithTax = customPriceWithTax;
+
+      const customQuantity = status ? status['customQuantity'] : undefined;
+      item.customQuantity = customQuantity;
 
       const isChecked = status ? status['isChecked'] : false;
       item.isChecked = isChecked;

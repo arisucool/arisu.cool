@@ -1,0 +1,69 @@
+<h1 mat-dialog-title>{{ data.item.name }}</h1>
+<div mat-dialog-content>
+  <p>
+    <!-- 標準価格 -->
+    <span class="default-price" *ngIf="data.item.priceWithTax">
+      標準価格: {{ data.item.priceWithTax | currency : "JPY" : "symbol" }}
+    </span>
+    <span
+      class="default-price"
+      *ngIf="data.item.boxPriceWithTax"
+      matTooltip="単体購入時とBOX購入時相当の価格差を表示しています"
+    >
+      〜 {{ data.item.boxPriceWithTax | currency : "JPY" : "symbol" }}
+    </span>
+    <!---->
+  </p>
+
+  <mat-form-field floatLabel="always">
+    <mat-label>購入した金額</mat-label>
+    <input
+      matInput
+      type="number"
+      [(ngModel)]="data.item.customPriceWithTax"
+      min="1"
+      step="1"
+      max="1000000"
+    />
+    <span matSuffix>円</span>
+  </mat-form-field>
+  <mat-form-field floatLabel="always">
+    <mat-label>購入した個数</mat-label>
+    <input
+      matInput
+      type="number"
+      [(ngModel)]="data.item.customQuantity"
+      min="1"
+      step="1"
+      max="100"
+    />
+    <span matSuffix>個</span>
+  </mat-form-field>
+</div>
+
+<div mat-dialog-actions>
+  <span style="font-size: 0.8rem; margin-left: 1rem">
+    小計: &nbsp;
+    <ng-container
+      *ngIf="data.item.customQuantity && data.item.customPriceWithTax"
+    >
+      {{
+        data.item.customQuantity * data.item.customPriceWithTax
+          | currency : "JPY" : "symbol"
+      }}
+    </ng-container>
+    <ng-container
+      *ngIf="!data.item.customQuantity || !data.item.customPriceWithTax"
+    >
+      -
+    </ng-container>
+    &nbsp; &nbsp;
+  </span>
+
+  <span style="flex: 1 1 auto"></span>
+
+  <button mat-button mat-dialog-close>キャンセル</button>
+  <button mat-button color="primary" mat-dialog-close="OK" cdkFocusInitial>
+    保存
+  </button>
+</div>

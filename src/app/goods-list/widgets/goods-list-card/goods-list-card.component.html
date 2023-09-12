@@ -120,48 +120,109 @@
       <!-- 子アイテムがある場合 -->
       <ng-container *ngIf="item.children && item.children.length >= 1">
         <ng-container *ngFor="let child of item.children">
-          <mat-checkbox
-            class="checklist-item"
-            [(ngModel)]="child.isChecked"
-            (ngModelChange)="itemChange.emit(item)"
-          >
-            {{ child.name }}
-            &nbsp;&nbsp;
-            <span class="price" *ngIf="child.priceWithTax">
-              {{ child.priceWithTax | currency : "JPY" : "symbol" }}
-            </span>
-            <span
-              class="price"
-              *ngIf="child.boxPriceWithTax"
-              matTooltip="単体購入時とBOX購入時相当の価格差を表示しています"
+          <div class="checklist-item">
+            <mat-checkbox
+              [(ngModel)]="child.isChecked"
+              (ngModelChange)="itemChange.emit(item)"
             >
-              〜 {{ child.boxPriceWithTax | currency : "JPY" : "symbol" }}
-            </span>
-          </mat-checkbox>
+              {{ child.name }}
+            </mat-checkbox>
+            &nbsp;&nbsp;
+
+            <!-- 価格 -->
+            <ng-container *ngIf="child.customPriceWithTax">
+              <span class="price">
+                {{ child.customPriceWithTax | currency : "JPY" : "symbol" }}
+              </span>
+
+              <span
+                class="quantity"
+                *ngIf="child.customQuantity && child.customQuantity !== 1"
+              >
+                x {{ child.customQuantity }}
+              </span>
+            </ng-container>
+
+            <ng-container *ngIf="!child.customPriceWithTax">
+              <span class="price" *ngIf="child.priceWithTax">
+                {{ child.priceWithTax | currency : "JPY" : "symbol" }}
+              </span>
+              <span
+                class="price"
+                *ngIf="child.boxPriceWithTax"
+                matTooltip="単体購入時とBOX購入時相当の価格差を表示しています"
+              >
+                〜 {{ child.boxPriceWithTax | currency : "JPY" : "symbol" }}
+              </span>
+            </ng-container>
+            <!---->
+            &nbsp;
+
+            <!-- 購入価格設定ボタン -->
+            <button
+              mat-icon-button
+              class="price-edit-button"
+              matTooltip="購入価格・個数を変更"
+              (click)="this.openEditDialog(child, true)"
+            >
+              <mat-icon>edit</mat-icon>
+            </button>
+            <!---->
+          </div>
         </ng-container>
       </ng-container>
       <!---->
 
       <!-- 子アイテムがない場合 -->
       <ng-container *ngIf="!item.children || item.children.length == 1">
-        <mat-checkbox
-          class="checklist-item"
-          [(ngModel)]="item.isChecked"
-          (ngModelChange)="itemChange.emit(item)"
-        >
-          {{ item.name }}
-          &nbsp;&nbsp;
-          <span class="price" *ngIf="item.priceWithTax">
-            {{ item.priceWithTax | currency : "JPY" : "symbol" }}
-          </span>
-          <span
-            class="price"
-            *ngIf="item.boxPriceWithTax"
-            matTooltip="単体購入時とBOX購入時相当の価格差を表示しています"
+        <div class="checklist-item">
+          <mat-checkbox
+            [(ngModel)]="item.isChecked"
+            (ngModelChange)="itemChange.emit(item)"
           >
-            〜 {{ item.boxPriceWithTax | currency : "JPY" : "symbol" }}
-          </span>
-        </mat-checkbox>
+            {{ item.name }}
+          </mat-checkbox>
+          &nbsp;&nbsp;
+          <!-- 価格 -->
+          <ng-container *ngIf="item.customPriceWithTax">
+            <span class="price">
+              {{ item.customPriceWithTax | currency : "JPY" : "symbol" }}
+            </span>
+
+            <span
+              class="quantity"
+              *ngIf="item.customQuantity && item.customQuantity !== 1"
+            >
+              x {{ item.customQuantity }}
+            </span>
+          </ng-container>
+
+          <ng-container *ngIf="!item.customPriceWithTax">
+            <span class="price" *ngIf="item.priceWithTax">
+              {{ item.priceWithTax | currency : "JPY" : "symbol" }}
+            </span>
+            <span
+              class="price"
+              *ngIf="item.boxPriceWithTax"
+              matTooltip="単体購入時とBOX購入時相当の価格差を表示しています"
+            >
+              〜 {{ item.boxPriceWithTax | currency : "JPY" : "symbol" }}
+            </span>
+          </ng-container>
+          <!---->
+          &nbsp;
+
+          <!-- 購入価格設定ボタン -->
+          <button
+            mat-icon-button
+            class="price-edit-button"
+            matTooltip="購入価格・個数を変更"
+            (click)="this.openEditDialog(item, false)"
+          >
+            <mat-icon>edit</mat-icon>
+          </button>
+          <!---->
+        </div>
       </ng-container>
       <!---->
     </div>
