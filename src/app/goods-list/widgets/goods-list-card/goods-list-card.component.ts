@@ -23,6 +23,7 @@ export class GoodsListCardComponent implements OnInit {
   paymentYearMonths: {
     yearMonth: string;
     label: string;
+    subLabel?: string;
   }[] = [];
 
   ngOnInit() {
@@ -42,12 +43,34 @@ export class GoodsListCardComponent implements OnInit {
     // 基準となる年月前後の年月を取得
     const criteriaYear = Number(criteriaYearMonth.slice(0, 4));
     const criteriaMonth = Number(criteriaYearMonth.slice(5, 7));
-    for (let i = -3; i <= 6; i++) {
+    for (let i = -5; i <= 5; i++) {
       const year = criteriaYear + Math.floor((criteriaMonth + i - 1) / 12);
       const month = ((criteriaMonth + i - 1) % 12) + 1;
+
+      // ラベルを設定
+      let subLabel: string | undefined;
+      if (this.item.reservationEndDate) {
+        const date_ = new Date(this.item.reservationEndDate);
+        const year_ = date_.getFullYear();
+        const month_ = date_.getMonth() + 1;
+        if (year == year_ && month == month_) {
+          subLabel = ' (予約締切)';
+        }
+      }
+      if (this.item.saleDate) {
+        const saleDate = new Date(this.item.saleDate);
+        const saleYear = saleDate.getFullYear();
+        const saleMonth = saleDate.getMonth() + 1;
+        if (year == saleYear && month == saleMonth) {
+          subLabel = ' (発売)';
+        }
+      }
+
+      // 選択肢へ追加
       this.paymentYearMonths.push({
         yearMonth: `${year}/${month.toString().padStart(2, '0')}`,
         label: `${year}/${month.toString().padStart(2, '0')}`,
+        subLabel: subLabel,
       });
     }
   }

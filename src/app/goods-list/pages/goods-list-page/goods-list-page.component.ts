@@ -55,7 +55,9 @@ export class GoodsListPageComponent implements OnInit {
   async onItemStatusChange(item: GoodsListItem) {
     // 支払い時期の設定
     let paymentYearMonth =
-      item.selectedPaymentYearMonth ?? item.estimatedPaymentYearMonth;
+      item.selectedPaymentYearMonth && item.selectedPaymentYearMonth != ''
+        ? item.selectedPaymentYearMonth
+        : item.estimatedPaymentYearMonth;
 
     // ステータスを保存
     await this.goodsListService.setItemStatus(
@@ -70,7 +72,7 @@ export class GoodsListPageComponent implements OnInit {
         await this.goodsListService.setItemStatus(
           child.id,
           child.isChecked,
-          false,
+          item.isArchived,
           paymentYearMonth
         );
       }
@@ -112,6 +114,34 @@ export class GoodsListPageComponent implements OnInit {
   openPaymentReportDialog() {
     this.matDialog.open(GoodsPaymentReportDialogComponent, {
       maxWidth: '96vw',
+    });
+  }
+
+  async exportAsCsv() {
+    const csv = await this.goodsListService.getGoodsListAsCsv();
+
+    const now = new Date();
+    const dateParts = [
+      now.getFullYear(),
+      (now.getMonth() + 1).toString().padStart(2, '0'),
+      now.getDate().toString().padStart(2, '0'),
+      '-',
+      now.getHours().toString().padStart(2, '0'),
+      now.getMinutes().toString().padStart(2, '0'),
+      now.getSeconds().toString().padStart(2, '0'),
+    ];
+    const fileName = `goods-list-${dateParts.join('')}.csv`;
+
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    link.click();
+    window.URL.revokeObjectURL(url);
+
+    this.snackBar.open('主な情報をCSVとしてエクスポートしました', undefined, {
+      duration: 2000,
     });
   }
 }

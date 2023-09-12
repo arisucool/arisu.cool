@@ -59,6 +59,13 @@
       <!-- 発売状態 (販売中) -->
       <ng-container *ngIf="item.salesStatus === salesStatus.ON_SALE">
         <span class="sales-status on-sale"> 販売中 </span>
+        <span
+          class="sales-date"
+          matTooltip="このグッズの終売日"
+          *ngIf="item.endOfSaleDate"
+        >
+          {{ item.endOfSaleDate | date : "yyyy/MM/dd" }} まで
+        </span>
       </ng-container>
       <!---->
       <!-- 発売状態 (終売) -->
@@ -126,7 +133,7 @@
             <span
               class="price"
               *ngIf="child.boxPriceWithTax"
-              matTooltip="ランダム商品のため、単体購入時とBOX購入時相当の価格差を表示しています"
+              matTooltip="単体購入時とBOX購入時相当の価格差を表示しています"
             >
               〜 {{ child.boxPriceWithTax | currency : "JPY" : "symbol" }}
             </span>
@@ -150,7 +157,7 @@
           <span
             class="price"
             *ngIf="item.boxPriceWithTax"
-            matTooltip="ランダム商品のため、単体購入時とBOX購入時相当の価格差を表示しています"
+            matTooltip="単体購入時とBOX購入時相当の価格差を表示しています"
           >
             〜 {{ item.boxPriceWithTax | currency : "JPY" : "symbol" }}
           </span>
@@ -253,6 +260,11 @@
           "
         >
           {{ selection.label }}
+          <ng-container *ngIf="selection.subLabel">
+            <span style="font-size: 0.8rem">
+              {{ selection.subLabel }}
+            </span>
+          </ng-container>
         </button>
       </ng-container>
     </mat-menu>

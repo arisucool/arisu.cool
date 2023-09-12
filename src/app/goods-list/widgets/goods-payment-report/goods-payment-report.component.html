@@ -77,7 +77,7 @@
                 <span
                   class="price"
                   *ngIf="item.boxPriceWithTax"
-                  matTooltip="ランダム商品のため、単体購入時とBOX購入時相当の価格差を表示しています"
+                  matTooltip="単体購入時とBOX購入時相当の価格差を表示しています"
                 >
                   〜 {{ item.boxPriceWithTax | currency : "JPY" : "symbol" }}
                 </span>
@@ -100,7 +100,7 @@
                       <span
                         class="price"
                         *ngIf="child.boxPriceWithTax"
-                        matTooltip="ランダム商品のため、単体購入時とBOX購入時相当の価格差を表示しています"
+                        matTooltip="単体購入時とBOX購入時相当の価格差を表示しています"
                       >
                         〜
                         {{
