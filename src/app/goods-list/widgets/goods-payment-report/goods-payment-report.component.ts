@@ -48,7 +48,27 @@ export class GoodsPaymentReportComponent implements OnInit {
     const goodsList = await this.goodsListService.getGoodsList();
 
     // チェックを入れたアイテムのみに絞り込む
-    let checkedItems = goodsList.filter((item) => item.isChecked);
+    let checkedItemsRaw = goodsList.map((item) => {
+      // 項目のチェックが入っているならば
+      if (item.isChecked) return item;
+      // 子項目があれば
+      if (item.children) {
+        // チェックが入っている子項目のみに絞り込み
+        const checkedChildren = item.children.filter(
+          (child) => child.isChecked
+        );
+        // チェックが入っている子項目があれば
+        if (checkedChildren.length > 0) {
+          item.children = checkedChildren;
+          return item;
+        }
+      }
+      // その他ならば
+      return undefined;
+    });
+    let checkedItems = checkedItemsRaw.filter(
+      (item): item is GoodsListItem => item !== undefined
+    );
 
     // アーカイブしたアイテムをフィルタ
     if (!this.isIncludeArchiveItems) {
@@ -58,8 +78,9 @@ export class GoodsPaymentReportComponent implements OnInit {
     // 年月ごとにグループ化
     const groupedByYearMonth: { [key: string]: GoodsListItem[] } = {};
     for (const item of checkedItems) {
-      const yearMonth =
-        item.selectedPaymentYearMonth ?? item.estimatedPaymentYearMonth;
+      const yearMonth = item.selectedPaymentYearMonth
+        ? item.selectedPaymentYearMonth
+        : item.estimatedPaymentYearMonth;
       if (!groupedByYearMonth[yearMonth]) {
         groupedByYearMonth[yearMonth] = [];
       }

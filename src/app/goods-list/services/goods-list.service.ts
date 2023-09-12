@@ -116,7 +116,73 @@ export class GoodsListService {
     });
   }
 
-  getItemSalesStatus(item: GoodsListItem): GoodsListItemSalesStatus {
+  private async injectStatuses(rawItems: GoodsListItem[]) {
+    let items: GoodsListItem[] = [];
+
+    for (const rawItem of rawItems) {
+      if (!rawItem || isNaN(rawItem.id)) {
+        continue;
+      }
+
+      // 販売ステータスを取得
+      const salesStatus = this.getItemSalesStatus(rawItem);
+
+      // 推定支払い時期を取得
+      let estimatedPaymentYearMonth =
+        this.getEstimatedPaymentYearMonth(rawItem);
+
+      // 子項目を処理
+      if (rawItem.children) {
+        rawItem.children = await this.injectStatuses(rawItem.children);
+      }
+
+      // 項目を追加
+      items.push({
+        ...rawItem,
+        salesStatus: salesStatus,
+        estimatedPaymentYearMonth: estimatedPaymentYearMonth,
+        isChecked: false,
+        isArchived: false,
+      });
+    }
+
+    for (const item of items) {
+      const status = await this.storage?.get(item.id.toString());
+
+      const isChecked = status ? status['isChecked'] : false;
+      item.isChecked = isChecked;
+
+      const isArchived = status ? status['isArchived'] : false;
+      item.isArchived = isArchived;
+
+      const selectedPaymentYearMonth = status ? status['paymentYearMonth'] : '';
+      item.selectedPaymentYearMonth = selectedPaymentYearMonth;
+    }
+
+    // 予約開始日順にソート
+    items = items.sort((a, b) => {
+      if (a.reservationStartDate === undefined) return 1;
+      if (b.reservationStartDate === undefined) return -1;
+      return (
+        new Date(b.reservationStartDate).getTime() -
+        new Date(a.reservationStartDate).getTime()
+      );
+    });
+
+    // 発売日順にソート
+    items = items.sort((a, b) => {
+      if (a.saleDate === undefined) return 0;
+      if (b.saleDate === undefined) return 0;
+      return new Date(b.saleDate).getTime() - new Date(a.saleDate).getTime();
+    });
+
+    return items;
+  }
+
+  private getItemSalesStatus(
+    item: GoodsListItem,
+    now = new Date()
+  ): GoodsListItemSalesStatus {
     let isEndOfSale = this.isItemEndOfSale(item);
 
     let salesStatus = GoodsListItemSalesStatus.UNKNOWN;
@@ -125,8 +191,6 @@ export class GoodsListService {
       // 終売とする
       salesStatus = GoodsListItemSalesStatus.END_OF_SALE;
     } else {
-      const now = new Date();
-
       // 予約開始日を取得
       const reservationStartDate = item.reservationStartDate;
       if (reservationStartDate) {
@@ -177,95 +241,51 @@ export class GoodsListService {
     return salesStatus;
   }
 
-  private async injectStatuses(rawItems: GoodsListItem[]) {
-    let items: GoodsListItem[] = [];
-
-    for (const rawItem of rawItems) {
-      if (!rawItem || isNaN(rawItem.id)) {
-        continue;
+  private getEstimatedPaymentYearMonth(rawItem: GoodsListItem) {
+    let estimatedPaymentYearMonth = rawItem.estimatedPaymentYearMonth;
+    if (!estimatedPaymentYearMonth) {
+      // 推定支払い時期が不明ならば
+      if (
+        rawItem.salesStatus === GoodsListItemSalesStatus.BEFORE_RESERVATION &&
+        rawItem.reservationStartDate
+      ) {
+        // 予約開始前なら、予約開始日を設定
+        estimatedPaymentYearMonth = rawItem.reservationStartDate;
+      } else if (
+        rawItem.salesStatus === GoodsListItemSalesStatus.RESERVATION &&
+        rawItem.reservationEndDate
+      ) {
+        // 予約受付中なら、予約締切日を設定
+        estimatedPaymentYearMonth = rawItem.reservationEndDate;
+      } else if (
+        rawItem.salesStatus === GoodsListItemSalesStatus.END_OF_RESERVATION &&
+        rawItem.reservationEndDate
+      ) {
+        // 予約終了なら、予約終了日を設定
+        estimatedPaymentYearMonth = rawItem.reservationEndDate;
+      } else if (
+        rawItem.salesStatus === GoodsListItemSalesStatus.BEFORE_SALE &&
+        rawItem.saleDate
+      ) {
+        // 発売前なら、発売日を設定
+        estimatedPaymentYearMonth = rawItem.saleDate;
+      } else if (
+        rawItem.salesStatus === GoodsListItemSalesStatus.END_OF_SALE &&
+        rawItem.endOfSaleDate
+      ) {
+        // 終売なら、終売日を設定
+        estimatedPaymentYearMonth = rawItem.endOfSaleDate;
       }
-
-      // 販売ステータスを取得
-      const salesStatus = this.getItemSalesStatus(rawItem);
-
-      // 推定支払い時期を取得
-      let estimatedPaymentYearMonth = rawItem.estimatedPaymentYearMonth;
-      if (!estimatedPaymentYearMonth) {
-        // 推定支払い時期が不明ならば
-        if (
-          rawItem.salesStatus === GoodsListItemSalesStatus.BEFORE_RESERVATION &&
-          rawItem.reservationStartDate
-        ) {
-          // 予約開始前なら、予約開始日を設定
-          estimatedPaymentYearMonth = rawItem.reservationStartDate;
-        } else if (
-          rawItem.salesStatus === GoodsListItemSalesStatus.RESERVATION &&
-          rawItem.reservationEndDate
-        ) {
-          // 予約受付中なら、予約締切日を設定
-          estimatedPaymentYearMonth = rawItem.reservationEndDate;
-        } else if (
-          rawItem.salesStatus === GoodsListItemSalesStatus.BEFORE_SALE &&
-          rawItem.saleDate
-        ) {
-          // 発売前なら、発売日を設定
-          estimatedPaymentYearMonth = rawItem.saleDate;
-        }
-      }
-
-      if (!estimatedPaymentYearMonth) {
-        // 推定支払い時期をまだ特定できなかった場合は、現在の年月を設定
-        estimatedPaymentYearMonth = new Date()
-          .toISOString()
-          .replace(/-/g, '/')
-          .slice(0, 7);
-      }
-
-      // 子項目を処理
-      if (rawItem.children) {
-        rawItem.children = await this.injectStatuses(rawItem.children);
-      }
-
-      // 項目を追加
-      items.push({
-        ...rawItem,
-        salesStatus: salesStatus,
-        estimatedPaymentYearMonth: estimatedPaymentYearMonth,
-        isChecked: false,
-        isArchived: false,
-      });
     }
 
-    for (const item of items) {
-      const status = await this.storage?.get(item.id.toString());
-
-      const isChecked = status ? status['isChecked'] : false;
-      item.isChecked = isChecked;
-
-      const isArchived = status ? status['isArchived'] : false;
-      item.isArchived = isArchived;
-
-      const selectedPaymentYearMonth = status ? status['paymentYearMonth'] : '';
-      item.selectedPaymentYearMonth = selectedPaymentYearMonth;
+    if (!estimatedPaymentYearMonth) {
+      // 推定支払い時期をまだ特定できなかった場合は、現在の年月を設定
+      estimatedPaymentYearMonth = new Date()
+        .toISOString()
+        .replace(/-/g, '/')
+        .slice(0, 7);
     }
 
-    // 予約開始日順にソート
-    items = items.sort((a, b) => {
-      if (a.reservationStartDate === undefined) return 1;
-      if (b.reservationStartDate === undefined) return -1;
-      return (
-        new Date(b.reservationStartDate).getTime() -
-        new Date(a.reservationStartDate).getTime()
-      );
-    });
-
-    // 発売日順にソート
-    items = items.sort((a, b) => {
-      if (a.saleDate === undefined) return 0;
-      if (b.saleDate === undefined) return 0;
-      return new Date(b.saleDate).getTime() - new Date(a.saleDate).getTime();
-    });
-
-    return items;
+    return estimatedPaymentYearMonth;
   }
 }
