@@ -90,14 +90,14 @@
             {{ child.name }}
             &nbsp;&nbsp;
             <span class="price" *ngIf="child.priceWithTax">
-              {{ child.priceWithTax | currency : "JPY" : true }}
+              {{ child.priceWithTax | currency : "JPY" : "symbol" }}
             </span>
             <span
               class="price"
               *ngIf="child.boxPriceWithTax"
               matTooltip="ランダム商品のため、単体購入時とBOX購入時相当の価格差を表示しています"
             >
-              〜 {{ child.boxPriceWithTax | currency : "JPY" : true }}
+              〜 {{ child.boxPriceWithTax | currency : "JPY" : "symbol" }}
             </span>
           </mat-checkbox>
         </ng-container>
@@ -114,14 +114,14 @@
           {{ item.name }}
           &nbsp;&nbsp;
           <span class="price" *ngIf="item.priceWithTax">
-            {{ item.priceWithTax | currency : "JPY" : true }}
+            {{ item.priceWithTax | currency : "JPY" : "symbol" }}
           </span>
           <span
             class="price"
             *ngIf="item.boxPriceWithTax"
             matTooltip="ランダム商品のため、単体購入時とBOX購入時相当の価格差を表示しています"
           >
-            〜 {{ item.boxPriceWithTax | currency : "JPY" : true }}
+            〜 {{ item.boxPriceWithTax | currency : "JPY" : "symbol" }}
           </span>
         </mat-checkbox>
       </ng-container>
