@@ -11,6 +11,12 @@ export enum GoodsListItemSalesStatus {
   ON_SALE,
   // 終売
   END_OF_SALE,
+  // 再販前
+  BEFORE_RESALE,
+  // 再販中
+  ON_RESALE,
+  // 再販終了
+  END_OF_RESALE,
   // 不明
   UNKNOWN,
 }

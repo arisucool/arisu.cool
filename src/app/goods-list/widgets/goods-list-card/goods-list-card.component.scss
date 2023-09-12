@@ -1,15 +1,24 @@
 // 色 - 予約開始前
-$color-before-reservation: #27ae60;
+$color-before-reservation: #1abc9c;
 // 色 - 予約受付中
 $color-reservation: #27ae60;
 // 色 - 予約終了
 $color-end-of-reservation: #7f8c8d;
+
 // 色 - 発売前
 $color-before-sale: #1abc9c;
 // 色 - 販売中
 $color-on-sale: #27ae60;
 // 色 - 終売
 $color-end-of-sale: #7f8c8d;
+
+// 色 - 再販前
+$color-before-resale: #1abc9c;
+// 色 - 再販中
+$color-on-resale: #27ae60;
+// 色 - 再販終了
+$color-end-of-resale: #7f8c8d;
+
 // 色 - 不明
 $color-unknown: #aaaaaa;
 
@@ -32,6 +41,15 @@ mat-card {
   }
   &.sales-end-of-sale {
     border-left: 0.5rem solid $color-end-of-sale;
+  }
+  &.sales-before-resale {
+    border-left: 0.5rem solid $color-before-resale;
+  }
+  &.sales-on-resale {
+    border-left: 0.5rem solid $color-on-resale;
+  }
+  &.sales-end-of-resale {
+    border-left: 0.5rem solid $color-end-of-resale;
   }
   &.sales-unknown {
     border-left: 0.5rem solid $color-unknown;
@@ -56,6 +74,7 @@ mat-card {
     &.end-of-reservation {
       color: $color-end-of-reservation;
     }
+
     // 発売前
     &.before-sale {
       color: $color-before-sale;
@@ -68,6 +87,20 @@ mat-card {
     &.end-of-sale {
       color: $color-end-of-sale;
     }
+
+    // 再販前
+    &.before-resale {
+      color: $color-before-resale;
+    }
+    // 再販中
+    &.on-resale {
+      color: $color-on-resale;
+    }
+    // 再販終了
+    &.end-of-resale {
+      color: $color-end-of-resale;
+    }
+
     // 不明
     &.unknown {
       color: $color-unknown;

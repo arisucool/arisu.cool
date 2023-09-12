@@ -83,6 +83,22 @@ export class GoodsListService {
     if (!item.endOfSaleDate && !item.confirmedEndOfSaleDate) return false;
 
     const now = new Date();
+
+    const endOfResaleDate = item.endOfResaleDate
+      ? new Date(item.endOfResaleDate)
+      : undefined;
+    const confirmedEndOfResaleDate = item.confirmedEndOfResaleDate
+      ? new Date(item.confirmedEndOfResaleDate)
+      : undefined;
+
+    if (endOfResaleDate) {
+      if (endOfResaleDate < now) return true;
+      if (now < endOfResaleDate) return false;
+    }
+    if (confirmedEndOfResaleDate && confirmedEndOfResaleDate < now) {
+      return true;
+    }
+
     const endOfSaleDate = item.endOfSaleDate
       ? new Date(item.endOfSaleDate)
       : undefined;
@@ -198,6 +214,7 @@ export class GoodsListService {
         if (reservationStartDateDate > now) {
           // 予約開始前
           salesStatus = GoodsListItemSalesStatus.BEFORE_RESERVATION;
+          return salesStatus;
         } else {
           // 予約受付中
           salesStatus = GoodsListItemSalesStatus.RESERVATION;
@@ -208,7 +225,13 @@ export class GoodsListService {
       const reservationEndDate = item.reservationEndDate;
       if (reservationEndDate) {
         const reservationEndDateDate = new Date(reservationEndDate);
-        if (reservationEndDateDate < now) {
+        if (
+          salesStatus === GoodsListItemSalesStatus.RESERVATION &&
+          reservationEndDateDate > now
+        ) {
+          // 予約受付中で確定
+          return salesStatus;
+        } else if (reservationEndDateDate < now) {
           // 予約終了
           salesStatus = GoodsListItemSalesStatus.END_OF_RESERVATION;
         }
@@ -219,8 +242,13 @@ export class GoodsListService {
       if (saleDate) {
         const saleDateDate = new Date(saleDate);
         if (saleDateDate > now) {
-          // 発売前
-          salesStatus = GoodsListItemSalesStatus.BEFORE_SALE;
+          if (salesStatus === GoodsListItemSalesStatus.RESERVATION) {
+            // 予約受付中で確定
+            return salesStatus;
+          } else {
+            // 発売前
+            salesStatus = GoodsListItemSalesStatus.BEFORE_SALE;
+          }
         } else {
           // 販売中
           salesStatus = GoodsListItemSalesStatus.ON_SALE;
@@ -234,6 +262,19 @@ export class GoodsListService {
         if (endOfSaleDateDate < now) {
           // 終売
           salesStatus = GoodsListItemSalesStatus.END_OF_SALE;
+        }
+      }
+
+      // 再販日を取得
+      const resaleDate = item.resaleDate;
+      if (resaleDate) {
+        const resaleDateDate = new Date(resaleDate);
+        if (resaleDateDate > now) {
+          // 再販前
+          salesStatus = GoodsListItemSalesStatus.BEFORE_RESALE;
+        } else {
+          // 再販中
+          salesStatus = GoodsListItemSalesStatus.ON_RESALE;
         }
       }
     }
