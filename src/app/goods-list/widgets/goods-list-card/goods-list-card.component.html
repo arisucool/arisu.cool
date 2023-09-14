@@ -242,7 +242,7 @@
       <!---->
 
       <!-- 子アイテムがない場合 -->
-      <ng-container *ngIf="!item.children || item.children.length == 1">
+      <ng-container *ngIf="!item.children || item.children.length == 0">
         <div class="checklist-item">
           <mat-checkbox
             [(ngModel)]="item.isChecked"
