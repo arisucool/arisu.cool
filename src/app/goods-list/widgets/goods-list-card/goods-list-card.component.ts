@@ -35,6 +35,12 @@ export class GoodsListCardComponent implements OnInit {
     subLabel?: string;
   }[] = [];
 
+  // メモ編集領域の表示状態
+  isMemoEditing = false;
+
+  // メモ編集を保存するためのタイマー
+  memoAutoSaveTimer: any;
+
   constructor(private matDialog: MatDialog) {}
 
   ngOnInit() {
@@ -42,11 +48,25 @@ export class GoodsListCardComponent implements OnInit {
   }
 
   onChange() {
+    if (this.memoAutoSaveTimer) {
+      clearTimeout(this.memoAutoSaveTimer);
+    }
+
     // 親コンポーネントへ変更を通知
     this.itemChange.emit(this.item);
 
     // 小計を計算
     this.updateSubtotalPrice();
+  }
+
+  onChangeMemo() {
+    if (this.memoAutoSaveTimer) {
+      clearTimeout(this.memoAutoSaveTimer);
+    }
+
+    this.memoAutoSaveTimer = setTimeout(() => {
+      this.onChange();
+    }, 1000);
   }
 
   toggleAllChecks() {

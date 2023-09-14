@@ -1,5 +1,4 @@
 export interface GoodsListItemStatus {
-  note: undefined;
   isChecked: boolean;
   isArchived: boolean;
   paymentYearMonth: string;
@@ -7,4 +6,5 @@ export interface GoodsListItemStatus {
   firstCheckedAt: string;
   customQuantity?: number;
   customPriceWithTax?: number;
+  customMemo?: string;
 }

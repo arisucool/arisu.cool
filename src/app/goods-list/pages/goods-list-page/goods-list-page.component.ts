@@ -68,7 +68,8 @@ export class GoodsListPageComponent implements OnInit {
       item.isArchived,
       paymentYearMonth,
       item.customQuantity,
-      item.customPriceWithTax
+      item.customPriceWithTax,
+      item.customMemo
     );
 
     if (item.children) {
@@ -79,7 +80,8 @@ export class GoodsListPageComponent implements OnInit {
           item.isArchived,
           paymentYearMonth,
           child.customQuantity,
-          child.customPriceWithTax
+          child.customPriceWithTax,
+          child.customMemo
         );
       }
     }

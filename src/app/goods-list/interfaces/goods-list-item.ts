@@ -87,6 +87,9 @@ export interface GoodsListItem {
   // URL
   url?: string;
 
+  // メモ (カスタム)
+  customMemo?: string;
+
   // 販売ステータス
   salesStatus: GoodsListItemSalesStatus;
 

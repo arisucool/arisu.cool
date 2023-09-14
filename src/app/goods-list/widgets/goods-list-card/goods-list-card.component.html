@@ -131,6 +131,52 @@
         </span>
       </ng-container>
       <!---->
+
+      <!-- メモ -->
+      <div
+        class="memo"
+        *ngIf="isMemoEditing === false"
+        [ngClass]="{
+          'memo-empty':
+            item.customMemo === undefined || item.customMemo.length === 0
+        }"
+      >
+        <!-- メモ本文 -->
+        <span class="memo-content">
+          {{ item.customMemo }}
+        </span>
+        <!---->
+        <!-- メモ編集ボタン -->
+        <button
+          class="memo-edit-button"
+          mat-icon-button
+          matTooltip="メモを編集"
+          (click)="this.isMemoEditing = true"
+        >
+          <mat-icon>edit_note</mat-icon>
+        </button>
+        <!---->
+      </div>
+      <!---->
+
+      <!-- メモ編集領域 -->
+      <div class="memo-editor" *ngIf="isMemoEditing">
+        <mat-form-field
+          appearance="outline"
+          class="memo-editor"
+          floatLabel="always"
+        >
+          <mat-label>メモ</mat-label>
+          <textarea
+            matInput
+            [(ngModel)]="item.customMemo"
+            (ngModelChange)="onChangeMemo()"
+            (blur)="this.onChange(); this.isMemoEditing = false"
+            placeholder="購入店舗や注文番号など、ご自由にメモをご入力ください。端末内にのみ保存されます。"
+          ></textarea>
+        </mat-form-field>
+      </div>
+      <!---->
     </mat-card-subtitle>
     <!---->
   </mat-card-header>
