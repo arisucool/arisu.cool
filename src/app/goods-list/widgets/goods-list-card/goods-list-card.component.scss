@@ -117,6 +117,12 @@ mat-card {
   .maker {
     margin-left: 2rem;
   }
+
+  // 小計
+  .subtotal {
+    color: #333333;
+    white-space: nowrap;
+  }
 }
 
 // チェックリスト
@@ -125,28 +131,40 @@ mat-card {
   display: flex;
   flex-direction: column;
   .checklist-item {
-    .price {
-      font-size: 0.8rem;
+    &:hover {
+      background: #f8f8f8;
     }
 
-    .quantity {
-      font-size: 0.8rem;
-    }
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 
-    .price-edit-button {
-      color: #555555;
-      height: 1.5rem;
-      width: 1.5rem;
-      line-height: 1.5rem;
-      padding: 0;
-      vertical-align: middle;
+    .price-container {
+      white-space: nowrap;
 
-      mat-icon {
-        font-size: 1rem;
-        height: 1rem;
-        width: 1rem;
-        line-height: 1rem;
+      .price {
+        font-size: 0.8rem;
+      }
+
+      .quantity {
+        font-size: 0.8rem;
+      }
+
+      .price-edit-button {
+        color: #555555;
+        height: 1.5rem;
+        width: 1.5rem;
+        line-height: 1.5rem;
+        padding: 0;
         vertical-align: middle;
+
+        mat-icon {
+          font-size: 1rem;
+          height: 1rem;
+          width: 1rem;
+          line-height: 1rem;
+          vertical-align: middle;
+        }
       }
     }
   }

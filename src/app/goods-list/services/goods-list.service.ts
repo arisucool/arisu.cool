@@ -5,6 +5,7 @@ import { environment } from 'src/environments/environment';
 import {
   GoodsListItem,
   GoodsListItemSalesStatus,
+  GoodsListItemSalesType,
 } from '../interfaces/goods-list-item';
 import { GoodsListItemStatus } from '../interfaces/goods-list-item-status';
 import { GoodsTotalPrice } from '../interfaces/goods-total-price';
@@ -269,6 +270,23 @@ export class GoodsListService {
         rawItem.salesStatus = salesStatus;
       }
 
+      // 販売種別を取得
+      let salesType: GoodsListItemSalesType = GoodsListItemSalesType.C;
+      switch (rawItem.salesType as any) {
+        case 'A':
+          salesType = GoodsListItemSalesType.A;
+          break;
+        case 'A/B':
+          salesType = GoodsListItemSalesType.A_B;
+          break;
+        case 'B':
+          salesType = GoodsListItemSalesType.B;
+          break;
+        case 'C':
+          salesType = GoodsListItemSalesType.C;
+          break;
+      }
+
       // 推定支払い時期を取得
       let estimatedPaymentYearMonth =
         this.getEstimatedPaymentYearMonth(rawItem);
@@ -282,6 +300,7 @@ export class GoodsListService {
       items.push({
         ...rawItem,
         salesStatus: salesStatus,
+        salesType: salesType,
         estimatedPaymentYearMonth: estimatedPaymentYearMonth,
         isChecked: false,
         isArchived: false,
@@ -315,24 +334,214 @@ export class GoodsListService {
   }
 
   private sortItems(items: GoodsListItem[]) {
-    // 予約開始日順にソート
-    items = items.sort((a, b) => {
-      if (a.reservationStartDate === undefined) return 1;
-      if (b.reservationStartDate === undefined) return -1;
-      return (
-        new Date(b.reservationStartDate).getTime() -
-        new Date(a.reservationStartDate).getTime()
+    const now = new Date();
+    const group1a: GoodsListItem[] = [];
+    const group1b: GoodsListItem[] = [];
+    const group1ab: GoodsListItem[] = [];
+    const group3c: GoodsListItem[] = [];
+    const group4: GoodsListItem[] = [];
+    const groupUnknown: GoodsListItem[] = [];
+
+    items.forEach((item) => {
+      switch (item.salesStatus) {
+        case GoodsListItemSalesStatus.BEFORE_RESERVATION:
+          if (item.salesType === GoodsListItemSalesType.A) {
+            const daysToReservation = Math.ceil(
+              (new Date(item.reservationEndDate!).getTime() - now.getTime()) /
+                (1000 * 60 * 60 * 24)
+            );
+            if (daysToReservation < 0) {
+              group4.push(item);
+            } else {
+              group1a.push(item);
+            }
+          } else if (item.salesType === GoodsListItemSalesType.B) {
+            const daysToRelease = Math.ceil(
+              (new Date(item.saleDate!).getTime() - now.getTime()) /
+                (1000 * 60 * 60 * 24)
+            );
+            if (daysToRelease < 0) {
+              group4.push(item);
+            } else {
+              group1b.push(item);
+            }
+          } else if (item.salesType === GoodsListItemSalesType.A_B) {
+            const daysToReservation = Math.ceil(
+              (new Date(item.reservationEndDate!).getTime() - now.getTime()) /
+                (1000 * 60 * 60 * 24)
+            );
+            const daysToRelease = Math.ceil(
+              (new Date(item.saleDate!).getTime() - now.getTime()) /
+                (1000 * 60 * 60 * 24)
+            );
+            if (daysToReservation < 0 && daysToRelease < 0) {
+              group4.push(item);
+            } else {
+              group1ab.push(item);
+            }
+          }
+          break;
+        case GoodsListItemSalesStatus.RESERVATION:
+          const daysToReservation = Math.ceil(
+            (new Date(item.reservationEndDate!).getTime() - now.getTime()) /
+              (1000 * 60 * 60 * 24)
+          );
+          const daysToRelease = Math.ceil(
+            (new Date(item.saleDate!).getTime() - now.getTime()) /
+              (1000 * 60 * 60 * 24)
+          );
+          if (
+            item.salesType === GoodsListItemSalesType.A ||
+            item.salesType === GoodsListItemSalesType.A_B
+          ) {
+            group1ab.push(item);
+          } else if (item.salesType === GoodsListItemSalesType.B) {
+            if (daysToReservation < 0) {
+              group4.push(item);
+            } else {
+              group1b.push(item);
+            }
+          }
+          break;
+        case GoodsListItemSalesStatus.ON_SALE:
+          if (item.salesType === GoodsListItemSalesType.C) {
+            const daysToRelease = Math.ceil(
+              (new Date(item.saleDate!).getTime() - now.getTime()) /
+                (1000 * 60 * 60 * 24)
+            );
+            if (daysToRelease < 0) {
+              group3c.push(item);
+            } else {
+              group1a.push(item);
+            }
+          } else {
+            group1a.push(item);
+          }
+          break;
+        case GoodsListItemSalesStatus.END_OF_SALE:
+          group4.push(item);
+          break;
+        case GoodsListItemSalesStatus.END_OF_RESALE:
+        case GoodsListItemSalesStatus.UNKNOWN:
+          groupUnknown.push(item);
+          break;
+      }
+    });
+    group1a.sort((a, b) => {
+      const aDaysToReservation = Math.ceil(
+        (new Date(a.reservationEndDate!).getTime() - now.getTime()) /
+          (1000 * 60 * 60 * 24)
       );
+      const bDaysToReservation = Math.ceil(
+        (new Date(b.reservationEndDate!).getTime() - now.getTime()) /
+          (1000 * 60 * 60 * 24)
+      );
+      const aDaysToEndOfSale = Math.ceil(
+        (new Date(a.endOfSaleDate!).getTime() - now.getTime()) /
+          (1000 * 60 * 60 * 24)
+      );
+      const bDaysToEndOfSale = Math.ceil(
+        (new Date(b.endOfSaleDate!).getTime() - now.getTime()) /
+          (1000 * 60 * 60 * 24)
+      );
+      if (a.salesType === GoodsListItemSalesType.A) {
+        if (aDaysToReservation < 0 && bDaysToReservation < 0) {
+          return bDaysToEndOfSale - aDaysToEndOfSale;
+        } else {
+          return aDaysToReservation - bDaysToReservation;
+        }
+      } else if (a.salesType === GoodsListItemSalesType.A_B) {
+        if (aDaysToReservation < 0 && bDaysToReservation < 0) {
+          return bDaysToEndOfSale - aDaysToEndOfSale;
+        } else if (aDaysToReservation >= 0 && bDaysToReservation >= 0) {
+          return aDaysToReservation - bDaysToReservation;
+        } else if (aDaysToReservation < 0 && bDaysToReservation >= 0) {
+          return 1;
+        } else {
+          return -1;
+        }
+      } else {
+        return -1;
+      }
+    });
+    group1b.sort((a, b) => {
+      const aDaysToReservation = Math.ceil(
+        (new Date(a.reservationStartDate!).getTime() - now.getTime()) /
+          (1000 * 60 * 60 * 24)
+      );
+      const bDaysToReservation = Math.ceil(
+        (new Date(b.reservationStartDate!).getTime() - now.getTime()) /
+          (1000 * 60 * 60 * 24)
+      );
+      const aDaysToRelease = Math.ceil(
+        (new Date(a.saleDate!).getTime() - now.getTime()) /
+          (1000 * 60 * 60 * 24)
+      );
+      const bDaysToRelease = Math.ceil(
+        (new Date(b.saleDate!).getTime() - now.getTime()) /
+          (1000 * 60 * 60 * 24)
+      );
+      if (aDaysToReservation >= 0 && bDaysToReservation >= 0) {
+        return aDaysToReservation - bDaysToReservation;
+      } else if (aDaysToReservation < 0 && bDaysToReservation < 0) {
+        return bDaysToRelease - aDaysToRelease;
+      } else if (aDaysToReservation < 0 && bDaysToReservation >= 0) {
+        return 1;
+      } else {
+        return -1;
+      }
+    });
+    group1ab.sort((a, b) => {
+      const aDaysToReservation = Math.ceil(
+        (new Date(a.reservationEndDate!).getTime() - now.getTime()) /
+          (1000 * 60 * 60 * 24)
+      );
+      const bDaysToReservation = Math.ceil(
+        (new Date(b.reservationEndDate!).getTime() - now.getTime()) /
+          (1000 * 60 * 60 * 24)
+      );
+      const aDaysToEndOfSale = Math.ceil(
+        (new Date(a.endOfSaleDate!).getTime() - now.getTime()) /
+          (1000 * 60 * 60 * 24)
+      );
+      const bDaysToEndOfSale = Math.ceil(
+        (new Date(b.endOfSaleDate!).getTime() - now.getTime()) /
+          (1000 * 60 * 60 * 24)
+      );
+      if (aDaysToReservation >= 0 && bDaysToReservation >= 0) {
+        return aDaysToReservation - bDaysToReservation;
+      } else if (aDaysToReservation < 0 && bDaysToReservation < 0) {
+        return bDaysToEndOfSale - aDaysToEndOfSale;
+      } else if (aDaysToReservation < 0 && bDaysToReservation >= 0) {
+        return 1;
+      } else {
+        return -1;
+      }
+    });
+    group3c.sort((a, b) => {
+      const aDaysToRelease = Math.ceil(
+        (new Date(a.saleDate!).getTime() - now.getTime()) /
+          (1000 * 60 * 60 * 24)
+      );
+      const bDaysToRelease = Math.ceil(
+        (new Date(b.saleDate!).getTime() - now.getTime()) /
+          (1000 * 60 * 60 * 24)
+      );
+      if (aDaysToRelease < 0 && bDaysToRelease < 0) {
+        return bDaysToRelease - aDaysToRelease;
+      } else {
+        return -1;
+      }
     });
 
-    // 発売日順にソート
-    items = items.sort((a, b) => {
-      if (a.saleDate === undefined) return 0;
-      if (b.saleDate === undefined) return 0;
-      return new Date(b.saleDate).getTime() - new Date(a.saleDate).getTime();
-    });
-
-    return items;
+    let newItems: GoodsListItem[] = [];
+    group1a.forEach((item) => newItems.push(item));
+    group1b.forEach((item) => newItems.push(item));
+    group1ab.forEach((item) => newItems.push(item));
+    group3c.forEach((item) => newItems.push(item));
+    group4.forEach((item) => newItems.push(item));
+    groupUnknown.forEach((item) => newItems.push(item));
+    return newItems;
   }
 
   private getItemSalesStatus(

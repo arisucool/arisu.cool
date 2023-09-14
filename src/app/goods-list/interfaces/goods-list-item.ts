@@ -21,6 +21,17 @@ export enum GoodsListItemSalesStatus {
   UNKNOWN,
 }
 
+export enum GoodsListItemSalesType {
+  // 受注生産
+  A,
+  // 先着販売
+  B,
+  // 予約時受注生産、発売後は先着販売
+  A_B,
+  // 流注品
+  C,
+}
+
 export interface GoodsListItem {
   // ID
   id: number;
@@ -30,6 +41,9 @@ export interface GoodsListItem {
   maker: string;
   // 商品名
   name: string;
+
+  // 販売種別
+  salesType: GoodsListItemSalesType;
 
   // 予約開始日
   reservationStartDate?: string;

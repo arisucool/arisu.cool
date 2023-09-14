@@ -111,6 +111,26 @@
         {{ item.maker || "-" }}
       </span>
       <!---->
+
+      &nbsp;&nbsp;&nbsp;
+
+      <!-- 小計 -->
+      <ng-container *ngIf="this.subtotalPrice.min != this.subtotalPrice.max">
+        <span
+          class="subtotal"
+          matTooltip="ランダム商品等が含まれるため、単体購入時とBOX購入時相当の価格差を表示しています"
+        >
+          {{ this.subtotalPrice.min | currency : "JPY" : "symbol" }}
+          〜
+          {{ this.subtotalPrice.max | currency : "JPY" : "symbol" }}
+        </span>
+      </ng-container>
+      <ng-container *ngIf="this.subtotalPrice.min == this.subtotalPrice.max">
+        <span class="subtotal">
+          {{ this.subtotalPrice.min | currency : "JPY" : "symbol" }}
+        </span>
+      </ng-container>
+      <!---->
     </mat-card-subtitle>
     <!---->
   </mat-card-header>
@@ -123,50 +143,52 @@
           <div class="checklist-item">
             <mat-checkbox
               [(ngModel)]="child.isChecked"
-              (ngModelChange)="itemChange.emit(item)"
+              (ngModelChange)="onChange()"
             >
               {{ child.name }}
             </mat-checkbox>
             &nbsp;&nbsp;
 
             <!-- 価格 -->
-            <ng-container *ngIf="child.customPriceWithTax">
-              <span class="price">
-                {{ child.customPriceWithTax | currency : "JPY" : "symbol" }}
-              </span>
+            <div class="price-container">
+              <ng-container *ngIf="child.customPriceWithTax">
+                <span class="price">
+                  {{ child.customPriceWithTax | currency : "JPY" : "symbol" }}
+                </span>
 
-              <span
-                class="quantity"
-                *ngIf="child.customQuantity && child.customQuantity !== 1"
+                <span
+                  class="quantity"
+                  *ngIf="child.customQuantity && child.customQuantity !== 1"
+                >
+                  x {{ child.customQuantity }}
+                </span>
+              </ng-container>
+
+              <ng-container *ngIf="!child.customPriceWithTax">
+                <span class="price" *ngIf="child.priceWithTax">
+                  {{ child.priceWithTax | currency : "JPY" : "symbol" }}
+                </span>
+                <span
+                  class="price"
+                  *ngIf="child.boxPriceWithTax"
+                  matTooltip="単体購入時とBOX購入時相当の価格差を表示しています"
+                >
+                  〜 {{ child.boxPriceWithTax | currency : "JPY" : "symbol" }}
+                </span>
+              </ng-container>
+              &nbsp;
+
+              <!-- 購入価格設定ボタン -->
+              <button
+                mat-icon-button
+                class="price-edit-button"
+                matTooltip="購入価格・個数を変更"
+                (click)="this.openEditDialog(child, true)"
               >
-                x {{ child.customQuantity }}
-              </span>
-            </ng-container>
-
-            <ng-container *ngIf="!child.customPriceWithTax">
-              <span class="price" *ngIf="child.priceWithTax">
-                {{ child.priceWithTax | currency : "JPY" : "symbol" }}
-              </span>
-              <span
-                class="price"
-                *ngIf="child.boxPriceWithTax"
-                matTooltip="単体購入時とBOX購入時相当の価格差を表示しています"
-              >
-                〜 {{ child.boxPriceWithTax | currency : "JPY" : "symbol" }}
-              </span>
-            </ng-container>
-            <!---->
-            &nbsp;
-
-            <!-- 購入価格設定ボタン -->
-            <button
-              mat-icon-button
-              class="price-edit-button"
-              matTooltip="購入価格・個数を変更"
-              (click)="this.openEditDialog(child, true)"
-            >
-              <mat-icon>edit</mat-icon>
-            </button>
+                <mat-icon>edit</mat-icon>
+              </button>
+              <!---->
+            </div>
             <!---->
           </div>
         </ng-container>
@@ -178,49 +200,53 @@
         <div class="checklist-item">
           <mat-checkbox
             [(ngModel)]="item.isChecked"
-            (ngModelChange)="itemChange.emit(item)"
+            (ngModelChange)="onChange()"
           >
             {{ item.name }}
           </mat-checkbox>
           &nbsp;&nbsp;
+
           <!-- 価格 -->
-          <ng-container *ngIf="item.customPriceWithTax">
-            <span class="price">
-              {{ item.customPriceWithTax | currency : "JPY" : "symbol" }}
-            </span>
+          <div class="price-container">
+            <ng-container *ngIf="item.customPriceWithTax">
+              <span class="price">
+                {{ item.customPriceWithTax | currency : "JPY" : "symbol" }}
+              </span>
 
-            <span
-              class="quantity"
-              *ngIf="item.customQuantity && item.customQuantity !== 1"
+              <span
+                class="quantity"
+                *ngIf="item.customQuantity && item.customQuantity !== 1"
+              >
+                x {{ item.customQuantity }}
+              </span>
+            </ng-container>
+
+            <ng-container *ngIf="!item.customPriceWithTax">
+              <span class="price" *ngIf="item.priceWithTax">
+                {{ item.priceWithTax | currency : "JPY" : "symbol" }}
+              </span>
+              <span
+                class="price"
+                *ngIf="item.boxPriceWithTax"
+                matTooltip="単体購入時とBOX購入時相当の価格差を表示しています"
+              >
+                〜 {{ item.boxPriceWithTax | currency : "JPY" : "symbol" }}
+              </span>
+            </ng-container>
+            <!---->
+            &nbsp;
+
+            <!-- 購入価格設定ボタン -->
+            <button
+              mat-icon-button
+              class="price-edit-button"
+              matTooltip="購入価格・個数を変更"
+              (click)="this.openEditDialog(item, false)"
             >
-              x {{ item.customQuantity }}
-            </span>
-          </ng-container>
-
-          <ng-container *ngIf="!item.customPriceWithTax">
-            <span class="price" *ngIf="item.priceWithTax">
-              {{ item.priceWithTax | currency : "JPY" : "symbol" }}
-            </span>
-            <span
-              class="price"
-              *ngIf="item.boxPriceWithTax"
-              matTooltip="単体購入時とBOX購入時相当の価格差を表示しています"
-            >
-              〜 {{ item.boxPriceWithTax | currency : "JPY" : "symbol" }}
-            </span>
-          </ng-container>
-          <!---->
-          &nbsp;
-
-          <!-- 購入価格設定ボタン -->
-          <button
-            mat-icon-button
-            class="price-edit-button"
-            matTooltip="購入価格・個数を変更"
-            (click)="this.openEditDialog(item, false)"
-          >
-            <mat-icon>edit</mat-icon>
-          </button>
+              <mat-icon>edit</mat-icon>
+            </button>
+            <!---->
+          </div>
           <!---->
         </div>
       </ng-container>
@@ -260,7 +286,7 @@
         isAllChecked() ? '全てのチェックを外す' : '全てのチェックを入れる'
       "
       [color]="isAllChecked() ? 'accent' : ''"
-      (click)="toggleAllChecks(); itemChange.emit(item)"
+      (click)="toggleAllChecks(); onChange()"
     >
       <mat-icon *ngIf="isAllChecked()">check_box</mat-icon>
       <mat-icon *ngIf="!isAllChecked()">check_box_outline_blank</mat-icon>
@@ -310,8 +336,7 @@
         <button
           mat-menu-item
           (click)="
-            this.item.selectedPaymentYearMonth = selection.yearMonth;
-            itemChange.emit(item)
+            this.item.selectedPaymentYearMonth = selection.yearMonth; onChange()
           "
           [disabled]="
             (this.item.selectedPaymentYearMonth &&
@@ -336,7 +361,7 @@
       mat-icon-button
       color="primary"
       matTooltip="アーカイブする"
-      (click)="item.isArchived = true; itemChange.emit(item)"
+      (click)="item.isArchived = true; onChange()"
       *ngIf="!item.isArchived"
     >
       <mat-icon>archive</mat-icon>
@@ -345,7 +370,7 @@
       mat-icon-button
       color="primary"
       matTooltip="アーカイブを解除する"
-      (click)="item.isArchived = false; itemChange.emit(item)"
+      (click)="item.isArchived = false; onChange()"
       *ngIf="item.isArchived"
     >
       <mat-icon>unarchive</mat-icon>
