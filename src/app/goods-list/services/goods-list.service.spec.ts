@@ -8,6 +8,7 @@ import {
   GoodsListItemSalesType,
   GoodsListRawItem,
 } from '../interfaces/goods-list-item';
+import { GoodsListSortService } from './goods-list-sort.service';
 
 jest.mock('src/app/shared/services/app-cache.service');
 
@@ -16,7 +17,7 @@ describe('GoodsListService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [AppCacheService],
+      providers: [AppCacheService, GoodsListSortService],
     });
     service = TestBed.inject(GoodsListService);
   });
@@ -116,7 +117,7 @@ describe('GoodsListService', () => {
         },
       },
 
-      // 終売したアイテム (終売日はないが、終売を確認した)
+      // 終売したアイテム (先着順であり、終売日はないが、終売を確認した)
       {
         expectedStatus: GoodsListItemSalesStatus.END_OF_SALE,
         rawItem: {
@@ -124,7 +125,7 @@ describe('GoodsListService', () => {
           maker: '',
           name: '終売したアイテム',
           category: '',
-          salesType: GoodsListItemSalesType.A,
+          salesType: GoodsListItemSalesType.B,
           saleDate: '2023-07-01T00:00:00+0900',
           confirmedEndOfSaleDate: '2023-07-30T23:59:59+0900',
         },
@@ -179,7 +180,7 @@ describe('GoodsListService', () => {
           maker: '',
           name: '再販終了したアイテム',
           category: '',
-          salesType: GoodsListItemSalesType.A,
+          salesType: GoodsListItemSalesType.B,
           resaleDate: '2023-07-01T00:00:00+0900',
           confirmedEndOfResaleDate: '2023-07-30T23:59:59+0900',
         },

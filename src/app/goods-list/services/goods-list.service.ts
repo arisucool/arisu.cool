@@ -11,6 +11,7 @@ import {
 import { GoodsListItemStatus } from '../interfaces/goods-list-item-status';
 import { GoodsTotalPrice } from '../interfaces/goods-total-price';
 import * as PapaParse from 'papaparse';
+import { GoodsListSortService } from './goods-list-sort.service';
 
 @Injectable({
   providedIn: 'root',
@@ -21,7 +22,10 @@ export class GoodsListService {
 
   static readonly GOODS_LIST_JSON_CACHE_EXPIRES = 1000 * 60 * 30; // 30 minutes
 
-  constructor(private appCacheService: AppCacheService) {}
+  constructor(
+    private appCacheService: AppCacheService,
+    private goodsListSortService: GoodsListSortService
+  ) {}
 
   private async init() {
     if (this.storage) return;
@@ -43,7 +47,7 @@ export class GoodsListService {
     if (cache) {
       let items = await this.injectStatuses(cache);
       if (enableSort) {
-        items = this.sortItems(items);
+        items = this.goodsListSortService.sortItems(items);
       }
       return items;
     }
@@ -58,7 +62,7 @@ export class GoodsListService {
 
     let items = await this.injectStatuses(parsed);
     if (enableSort) {
-      items = this.sortItems(items);
+      items = this.goodsListSortService.sortItems(items);
     }
     return items;
   }
@@ -355,10 +359,6 @@ export class GoodsListService {
       item.selectedPaymentYearMonth = selectedPaymentYearMonth;
     }
 
-    return items;
-  }
-
-  private sortItems(items: GoodsListItem[]) {
     return items;
   }
 
