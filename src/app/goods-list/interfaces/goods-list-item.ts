@@ -1,23 +1,23 @@
 export enum GoodsListItemSalesStatus {
-  // 予約開始前
+  // 予約開始前 (0)
   BEFORE_RESERVATION,
-  // 予約受付中
+  // 予約受付中 (1)
   RESERVATION,
-  // 予約終了
+  // 予約終了 (2)
   END_OF_RESERVATION,
-  // 発売前
+  // 発売前 (3)
   BEFORE_SALE,
-  // 販売中
+  // 販売中 (4)
   ON_SALE,
-  // 終売
+  // 終売 (5)
   END_OF_SALE,
-  // 再販前
+  // 再販前 (6)
   BEFORE_RESALE,
-  // 再販中
+  // 再販中 (7)
   ON_RESALE,
-  // 再販終了
+  // 再販終了 (8)
   END_OF_RESALE,
-  // 不明
+  // 不明 (9)
   UNKNOWN,
 }
 
@@ -32,7 +32,7 @@ export enum GoodsListItemSalesType {
   C,
 }
 
-export interface GoodsListItem {
+export interface GoodsListRawItem {
   // ID
   id: number;
   // カテゴリ
@@ -68,6 +68,24 @@ export interface GoodsListItem {
   priceWithTax?: number;
   boxPriceWithTax?: number;
 
+  // 推定支払い時期
+  estimatedPaymentYearMonth?: string;
+
+  // 場所
+  place?: string;
+  // 補足情報
+  note?: string;
+  // URL
+  url?: string;
+
+  // 子項目
+  children?: GoodsListItem[];
+}
+
+export interface GoodsListItem extends GoodsListRawItem {
+  // 販売種別
+  salesType: GoodsListItemSalesType;
+
   // 税込価格 (カスタム)
   customPriceWithTax?: number;
 
@@ -80,13 +98,6 @@ export interface GoodsListItem {
   // 選択された支払い時期
   selectedPaymentYearMonth?: string;
 
-  // 場所
-  place?: string;
-  // 補足情報
-  note?: string;
-  // URL
-  url?: string;
-
   // メモ (カスタム)
   customMemo?: string;
 
@@ -98,7 +109,4 @@ export interface GoodsListItem {
 
   // アーカイブフラグ
   isArchived: boolean;
-
-  // 子項目
-  children?: GoodsListItem[];
 }

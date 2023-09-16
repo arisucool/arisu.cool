@@ -6,6 +6,7 @@ import {
   GoodsListItem,
   GoodsListItemSalesStatus,
   GoodsListItemSalesType,
+  GoodsListRawItem,
 } from '../interfaces/goods-list-item';
 import { GoodsListItemStatus } from '../interfaces/goods-list-item-status';
 import { GoodsTotalPrice } from '../interfaces/goods-total-price';
@@ -182,11 +183,10 @@ export class GoodsListService {
     };
   }
 
-  private isItemEndOfSale(item: GoodsListItem) {
-    if (!item.endOfSaleDate && !item.confirmedEndOfSaleDate) return false;
-
-    const now = new Date();
-
+  private getEndSaleReason(
+    item: GoodsListItem | GoodsListRawItem,
+    now = new Date()
+  ): 'END_OF_SALE' | 'END_OF_RESALE' | undefined {
     const endOfResaleDate = item.endOfResaleDate
       ? new Date(item.endOfResaleDate)
       : undefined;
@@ -194,12 +194,18 @@ export class GoodsListService {
       ? new Date(item.confirmedEndOfResaleDate)
       : undefined;
 
-    if (endOfResaleDate) {
-      if (endOfResaleDate < now) return true;
-      if (now < endOfResaleDate) return false;
-    }
-    if (confirmedEndOfResaleDate && confirmedEndOfResaleDate < now) {
-      return true;
+    if (endOfResaleDate || confirmedEndOfResaleDate) {
+      if (endOfResaleDate && endOfResaleDate < now) {
+        // 再販終了日を過ぎている場合は、再販が終了したとする
+        return 'END_OF_RESALE';
+      }
+      if (confirmedEndOfResaleDate && confirmedEndOfResaleDate < now) {
+        // 再販終了確認済みの場合は、再販が終了したとする
+        return 'END_OF_RESALE';
+      }
+
+      // 再販はまだ終了していない
+      return undefined;
     }
 
     const endOfSaleDate = item.endOfSaleDate
@@ -209,10 +215,22 @@ export class GoodsListService {
       ? new Date(item.confirmedEndOfSaleDate)
       : undefined;
 
-    if (endOfSaleDate && endOfSaleDate < now) return true;
-    if (confirmedEndOfSaleDate && confirmedEndOfSaleDate < now) return true;
+    if (!item.endOfSaleDate && !item.confirmedEndOfSaleDate) {
+      // 終売日または終売確認日のどちらもない場合は、販売はまだ終了していないとみなす
+      return undefined;
+    }
 
-    return false;
+    if (endOfSaleDate && endOfSaleDate < now) {
+      // 終売日を過ぎている場合は、販売が終了したとする
+      return 'END_OF_SALE';
+    }
+    if (confirmedEndOfSaleDate && confirmedEndOfSaleDate < now) {
+      // 終売確認済みの場合は、販売が終了したとする
+      return 'END_OF_SALE';
+    }
+
+    // 販売はまだ終了していない
+    return undefined;
   }
 
   async setItemStatus(
@@ -252,7 +270,7 @@ export class GoodsListService {
   }
 
   private async injectStatuses(
-    rawItems: GoodsListItem[],
+    rawItems: GoodsListRawItem[],
     parentItem?: GoodsListItem
   ) {
     let items: GoodsListItem[] = [];
@@ -263,12 +281,10 @@ export class GoodsListService {
       }
 
       // 販売ステータスを取得
-      const salesStatus = this.getItemSalesStatus(rawItem);
+      let salesStatus = this.getItemSalesStatus(rawItem);
       if (salesStatus === GoodsListItemSalesStatus.UNKNOWN && parentItem) {
         // 子項目 かつ 販売ステータスがなければ、親項目の販売ステータスを引き継ぐ
-        rawItem.salesStatus = parentItem.salesStatus;
-      } else {
-        rawItem.salesStatus = salesStatus;
+        salesStatus = parentItem.salesStatus;
       }
 
       // 販売種別を取得
@@ -289,23 +305,28 @@ export class GoodsListService {
       }
 
       // 推定支払い時期を取得
-      let estimatedPaymentYearMonth =
-        this.getEstimatedPaymentYearMonth(rawItem);
+      let estimatedPaymentYearMonth = this.getEstimatedPaymentYearMonth(
+        rawItem,
+        salesStatus
+      );
 
-      // 子項目を処理
-      if (rawItem.children) {
-        rawItem.children = await this.injectStatuses(rawItem.children, rawItem);
-      }
-
-      // 項目を追加
-      items.push({
+      // 項目を生成
+      const item: GoodsListItem = {
         ...rawItem,
         salesStatus: salesStatus,
         salesType: salesType,
         estimatedPaymentYearMonth: estimatedPaymentYearMonth,
         isChecked: false,
         isArchived: false,
-      });
+      };
+
+      // 子項目を処理
+      if (item.children) {
+        item.children = await this.injectStatuses(item.children, item);
+      }
+
+      // 項目を追加
+      items.push(item);
     }
 
     for (const item of items) {
@@ -342,100 +363,106 @@ export class GoodsListService {
   }
 
   private getItemSalesStatus(
-    item: GoodsListItem,
+    rawItem: GoodsListRawItem,
     now = new Date()
   ): GoodsListItemSalesStatus {
-    let isEndOfSale = this.isItemEndOfSale(item);
+    const endSaleReason = this.getEndSaleReason(rawItem, now);
+    if (endSaleReason === 'END_OF_SALE') {
+      // 終売とする
+      return GoodsListItemSalesStatus.END_OF_SALE;
+    } else if (endSaleReason === 'END_OF_RESALE') {
+      // 再販終了とする
+      return GoodsListItemSalesStatus.END_OF_RESALE;
+    }
 
+    // 販売ステータスを初期化
     let salesStatus = GoodsListItemSalesStatus.UNKNOWN;
 
-    if (isEndOfSale) {
-      // 終売とする
-      salesStatus = GoodsListItemSalesStatus.END_OF_SALE;
-    } else {
-      // 予約開始日を取得
-      const reservationStartDate = item.reservationStartDate;
-      if (reservationStartDate) {
-        const reservationStartDateDate = new Date(reservationStartDate);
-        if (reservationStartDateDate > now) {
-          // 予約開始前
-          salesStatus = GoodsListItemSalesStatus.BEFORE_RESERVATION;
-          return salesStatus;
-        } else {
-          // 予約受付中
-          salesStatus = GoodsListItemSalesStatus.RESERVATION;
-        }
+    // 予約開始日を取得
+    const reservationStartDate = rawItem.reservationStartDate;
+    if (reservationStartDate) {
+      const reservationStartDateDate = new Date(reservationStartDate);
+      if (reservationStartDateDate > now) {
+        // 予約開始前
+        salesStatus = GoodsListItemSalesStatus.BEFORE_RESERVATION;
+        return salesStatus;
+      } else {
+        // 予約受付中
+        salesStatus = GoodsListItemSalesStatus.RESERVATION;
       }
+    }
 
-      // 予約締切日を取得
-      const reservationEndDate = item.reservationEndDate;
-      if (reservationEndDate) {
-        const reservationEndDateDate = new Date(reservationEndDate);
-        if (
-          salesStatus === GoodsListItemSalesStatus.RESERVATION &&
-          reservationEndDateDate > now
-        ) {
+    // 予約締切日を取得
+    const reservationEndDate = rawItem.reservationEndDate;
+    if (reservationEndDate) {
+      const reservationEndDateDate = new Date(reservationEndDate);
+      if (
+        salesStatus === GoodsListItemSalesStatus.RESERVATION &&
+        reservationEndDateDate > now
+      ) {
+        // 予約受付中で確定
+        return salesStatus;
+      } else if (reservationEndDateDate < now) {
+        // 予約終了
+        salesStatus = GoodsListItemSalesStatus.END_OF_RESERVATION;
+      }
+    }
+
+    // 発売日を取得
+    const saleDate = rawItem.saleDate;
+    if (saleDate) {
+      const saleDateDate = new Date(saleDate);
+      if (saleDateDate > now) {
+        if (salesStatus === GoodsListItemSalesStatus.RESERVATION) {
           // 予約受付中で確定
           return salesStatus;
-        } else if (reservationEndDateDate < now) {
-          // 予約終了
-          salesStatus = GoodsListItemSalesStatus.END_OF_RESERVATION;
-        }
-      }
-
-      // 発売日を取得
-      const saleDate = item.saleDate;
-      if (saleDate) {
-        const saleDateDate = new Date(saleDate);
-        if (saleDateDate > now) {
-          if (salesStatus === GoodsListItemSalesStatus.RESERVATION) {
-            // 予約受付中で確定
-            return salesStatus;
-          } else {
-            // 発売前
-            salesStatus = GoodsListItemSalesStatus.BEFORE_SALE;
-          }
         } else {
-          // 販売中
-          salesStatus = GoodsListItemSalesStatus.ON_SALE;
+          // 発売前
+          salesStatus = GoodsListItemSalesStatus.BEFORE_SALE;
         }
+      } else {
+        // 販売中
+        salesStatus = GoodsListItemSalesStatus.ON_SALE;
       }
+    }
 
-      // 終売日を取得
-      const endOfSaleDate = item.endOfSaleDate;
-      if (endOfSaleDate) {
-        const endOfSaleDateDate = new Date(endOfSaleDate);
-        if (endOfSaleDateDate < now) {
-          // 終売
-          salesStatus = GoodsListItemSalesStatus.END_OF_SALE;
-        }
+    // 終売日を取得
+    const endOfSaleDate = rawItem.endOfSaleDate;
+    if (endOfSaleDate) {
+      const endOfSaleDateDate = new Date(endOfSaleDate);
+      if (endOfSaleDateDate < now) {
+        // 終売
+        salesStatus = GoodsListItemSalesStatus.END_OF_SALE;
       }
+    }
 
-      // 再販日を取得
-      const resaleDate = item.resaleDate;
-      if (resaleDate) {
-        const resaleDateDate = new Date(resaleDate);
-        if (resaleDateDate > now) {
-          // 再販前
-          salesStatus = GoodsListItemSalesStatus.BEFORE_RESALE;
-        } else {
-          // 再販中
-          salesStatus = GoodsListItemSalesStatus.ON_RESALE;
-        }
+    // 再販日を取得
+    const resaleDate = rawItem.resaleDate;
+    if (resaleDate) {
+      const resaleDateDate = new Date(resaleDate);
+      if (resaleDateDate > now) {
+        // 再販前
+        salesStatus = GoodsListItemSalesStatus.BEFORE_RESALE;
+      } else {
+        // 再販中
+        salesStatus = GoodsListItemSalesStatus.ON_RESALE;
       }
     }
 
     return salesStatus;
   }
 
-  private getEstimatedPaymentYearMonth(rawItem: GoodsListItem): string {
+  private getEstimatedPaymentYearMonth(
+    rawItem: GoodsListRawItem,
+    salesStatus: GoodsListItemSalesStatus
+  ): string {
     let estimatedPaymentYearMonth: string | undefined =
       rawItem.estimatedPaymentYearMonth;
 
     if (!estimatedPaymentYearMonth) {
       // 推定支払い時期が不明ならば
 
-      if (rawItem.salesStatus === undefined) {
+      if (salesStatus === undefined) {
         console.warn(
           `[GoodsListService] getEstimatedPaymentYearMonth - salesStatus is undefined`,
           rawItem
@@ -443,7 +470,7 @@ export class GoodsListService {
       }
 
       if (
-        rawItem.salesStatus === GoodsListItemSalesStatus.BEFORE_RESERVATION &&
+        salesStatus === GoodsListItemSalesStatus.BEFORE_RESERVATION &&
         rawItem.reservationEndDate
       ) {
         // 予約開始前、かつ、予約締切日があるなら、予約締切日を設定
@@ -451,13 +478,13 @@ export class GoodsListService {
           rawItem.reservationEndDate
         );
       } else if (
-        rawItem.salesStatus === GoodsListItemSalesStatus.BEFORE_RESERVATION &&
+        salesStatus === GoodsListItemSalesStatus.BEFORE_RESERVATION &&
         rawItem.saleDate
       ) {
         // 予約開始前、かつ、発売日があるなら、発売日を設定
         estimatedPaymentYearMonth = this.dateToYearMonth(rawItem.saleDate);
       } else if (
-        rawItem.salesStatus === GoodsListItemSalesStatus.BEFORE_RESERVATION &&
+        salesStatus === GoodsListItemSalesStatus.BEFORE_RESERVATION &&
         rawItem.reservationStartDate
       ) {
         // 予約開始前、かつ、予約開始日があるなら、予約開始日を設定
@@ -465,7 +492,7 @@ export class GoodsListService {
           rawItem.reservationStartDate
         );
       } else if (
-        rawItem.salesStatus === GoodsListItemSalesStatus.RESERVATION &&
+        salesStatus === GoodsListItemSalesStatus.RESERVATION &&
         rawItem.reservationEndDate
       ) {
         // 予約受付中、かつ、予約締切日があるなら、予約締切日を設定
@@ -473,13 +500,13 @@ export class GoodsListService {
           rawItem.reservationEndDate
         );
       } else if (
-        rawItem.salesStatus === GoodsListItemSalesStatus.RESERVATION &&
+        salesStatus === GoodsListItemSalesStatus.RESERVATION &&
         rawItem.saleDate
       ) {
         // 予約受付中、かつ、発売日があるなら、発売日を設定
         estimatedPaymentYearMonth = this.dateToYearMonth(rawItem.saleDate);
       } else if (
-        rawItem.salesStatus === GoodsListItemSalesStatus.END_OF_RESERVATION &&
+        salesStatus === GoodsListItemSalesStatus.END_OF_RESERVATION &&
         rawItem.reservationEndDate
       ) {
         // 予約終了、かつ、予約締切日があるなら、予約終了日を設定
@@ -487,25 +514,25 @@ export class GoodsListService {
           rawItem.reservationEndDate
         );
       } else if (
-        rawItem.salesStatus === GoodsListItemSalesStatus.END_OF_RESERVATION &&
+        salesStatus === GoodsListItemSalesStatus.END_OF_RESERVATION &&
         rawItem.saleDate
       ) {
         // 予約終了、かつ、発売日があるなら、発売日を設定
         estimatedPaymentYearMonth = this.dateToYearMonth(rawItem.saleDate);
       } else if (
-        rawItem.salesStatus === GoodsListItemSalesStatus.BEFORE_SALE &&
+        salesStatus === GoodsListItemSalesStatus.BEFORE_SALE &&
         rawItem.saleDate
       ) {
         // 発売前なら、発売日を設定
         estimatedPaymentYearMonth = this.dateToYearMonth(rawItem.saleDate);
       } else if (
-        rawItem.salesStatus === GoodsListItemSalesStatus.END_OF_SALE &&
+        salesStatus === GoodsListItemSalesStatus.END_OF_SALE &&
         rawItem.endOfSaleDate
       ) {
         // 終売、かつ終売日があれば、終売日を設定
         estimatedPaymentYearMonth = this.dateToYearMonth(rawItem.endOfSaleDate);
       } else if (
-        rawItem.salesStatus === GoodsListItemSalesStatus.END_OF_SALE &&
+        salesStatus === GoodsListItemSalesStatus.END_OF_SALE &&
         rawItem.confirmedEndOfSaleDate
       ) {
         // 終売、かつ終売確認日があれば、終売日を設定
