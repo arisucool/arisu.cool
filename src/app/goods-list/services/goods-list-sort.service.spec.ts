@@ -26,11 +26,46 @@ describe('GoodsListSortService', () => {
     // テストデータ
     let testItems: GoodsListItem[] = [
       // --- 1. 入手できなくなる可能性があるアイテム ---
+      {
+        id: 10,
+        name: '再販中だが、まもなく終了するアイテム (予約時: 受注生産, 販売時: 数量限定)',
+        salesStatus: GoodsListItemSalesStatus.ON_RESALE,
+        salesType: GoodsListItemSalesType.A_B,
+        reservationStartDate: '2023-07-201T09:00:00',
+        reservationEndDate: '2023-07-31T23:59:59',
+        estimatedPaymentYearMonth: 'XXXX-XX',
+        category: '',
+        isArchived: false,
+        isChecked: false,
+      },
+      {
+        id: 11,
+        name: '予約を受け付けているが、まもなく終了するアイテム (予約時: 受注生産, 販売時: 数量限定)',
+        salesStatus: GoodsListItemSalesStatus.ON_SALE,
+        salesType: GoodsListItemSalesType.A_B,
+        reservationStartDate: '2023-07-201T09:00:00',
+        reservationEndDate: '2023-08-01T23:59:59',
+        estimatedPaymentYearMonth: 'XXXX-XX',
+        category: '',
+        isArchived: false,
+        isChecked: false,
+      },
+      {
+        id: 15,
+        name: '予約を受け付けていて、期間に余裕があるアイテム (予約時: 受注生産, 販売時: 数量限定)',
+        salesStatus: GoodsListItemSalesStatus.RESERVATION,
+        salesType: GoodsListItemSalesType.A_B,
+        reservationStartDate: '2023-07-101T09:00:00',
+        reservationEndDate: '2023-08-20T23:59:59',
+        estimatedPaymentYearMonth: 'XXXX-XX',
+        category: '',
+        isArchived: false,
+        isChecked: false,
+      },
 
       // --- 2. まだ入手することができないアイテム ---
       {
         id: 20,
-        maker: '',
         name: '【2】 7日後に発売され、急いで入手すべきアイテム (数量限定で発売)',
         salesStatus: GoodsListItemSalesStatus.BEFORE_SALE,
         salesType: GoodsListItemSalesType.B,
@@ -42,7 +77,6 @@ describe('GoodsListSortService', () => {
       },
       {
         id: 21,
-        maker: '',
         name: '【2】 10日後に予約開始され、急いで入手すべきアイテム (数量限定で予約)',
         salesStatus: GoodsListItemSalesStatus.BEFORE_SALE,
         salesType: GoodsListItemSalesType.B,
@@ -55,7 +89,6 @@ describe('GoodsListSortService', () => {
       },
       {
         id: 22,
-        maker: '',
         name: '【2】 14日後に再販され、急いで入手すべきアイテム (数量限定で再販)',
         salesStatus: GoodsListItemSalesStatus.BEFORE_SALE,
         salesType: GoodsListItemSalesType.B,
@@ -67,7 +100,6 @@ describe('GoodsListSortService', () => {
       },
       {
         id: 23,
-        maker: '',
         name: '【2】 3日後に予約開始され、期間中は確実に予約できるアイテム (受注生産で予約)',
         salesStatus: GoodsListItemSalesStatus.BEFORE_RESERVATION,
         salesType: GoodsListItemSalesType.A,
@@ -80,7 +112,6 @@ describe('GoodsListSortService', () => {
       },
       {
         id: 24,
-        maker: '',
         name: '【2】 10日後に発売され、期間中は確実に購入できるアイテム (受注生産で発売)',
         salesStatus: GoodsListItemSalesStatus.BEFORE_SALE,
         salesType: GoodsListItemSalesType.A,
@@ -93,7 +124,6 @@ describe('GoodsListSortService', () => {
       },
       {
         id: 25,
-        maker: '',
         name: '【2】 12日後に再販され、期間中は確実に購入できるアイテム (受注生産で再販)',
         salesStatus: GoodsListItemSalesStatus.BEFORE_SALE,
         salesType: GoodsListItemSalesType.A,
@@ -108,7 +138,6 @@ describe('GoodsListSortService', () => {
       // --- 3. いつでも入手できるアイテム ---
       {
         id: 30,
-        maker: '',
         name: '【3】 すでに発売済みで入手性の高いアイテム (A)',
         salesStatus: GoodsListItemSalesStatus.ON_SALE,
         salesType: GoodsListItemSalesType.C,
@@ -121,7 +150,6 @@ describe('GoodsListSortService', () => {
       },
       {
         id: 31,
-        maker: '',
         name: '【3】 すでに発売済みで入手性の高いアイテム (B)',
         salesStatus: GoodsListItemSalesStatus.ON_SALE,
         salesType: GoodsListItemSalesType.C,
@@ -136,7 +164,19 @@ describe('GoodsListSortService', () => {
       // --- 4. すでに入手できなくなったアイテム ---
       {
         id: 40,
-        maker: '',
+        name: '【4】 予約は締め切られたが、発売時期が不明なアイテム',
+        salesStatus: GoodsListItemSalesStatus.END_OF_RESERVATION,
+        salesType: GoodsListItemSalesType.A,
+        // 〜2023/07/20
+        reservationStartDate: '2023-07-01T00:00:00',
+        reservationEndDate: '2023-07-20T00:00:00',
+        estimatedPaymentYearMonth: 'XXXX-XX',
+        category: '',
+        isArchived: false,
+        isChecked: false,
+      },
+      {
+        id: 41,
         name: '【4】 再販終了したアイテム (先着順であり、終売日はないが、最近に終売を確認した)',
         salesStatus: GoodsListItemSalesStatus.END_OF_RESALE,
         salesType: GoodsListItemSalesType.B,
@@ -149,8 +189,7 @@ describe('GoodsListSortService', () => {
         isChecked: false,
       },
       {
-        id: 41,
-        maker: '',
+        id: 42,
         name: '【4】 終売したアイテム (終売日を過ぎた)',
         salesStatus: GoodsListItemSalesStatus.END_OF_SALE,
         salesType: GoodsListItemSalesType.A,
@@ -163,8 +202,7 @@ describe('GoodsListSortService', () => {
         isChecked: false,
       },
       {
-        id: 42,
-        maker: '',
+        id: 43,
         name: '【4】 再販終了したアイテム (再販終了日を過ぎた)',
         salesStatus: GoodsListItemSalesStatus.END_OF_RESALE,
         salesType: GoodsListItemSalesType.A,
@@ -177,14 +215,23 @@ describe('GoodsListSortService', () => {
         isChecked: false,
       },
       {
-        id: 43,
-        maker: '',
+        id: 44,
         name: '【4】 終売したアイテム (先着順であり、終売日はないが、終売を確認した)',
         salesStatus: GoodsListItemSalesStatus.END_OF_SALE,
         salesType: GoodsListItemSalesType.B,
         // 〜2023/06/10
         saleDate: '2023-06-01T00:00:00',
         confirmedEndOfSaleDate: '2023-06-10T00:00:00',
+        estimatedPaymentYearMonth: 'XXXX-XX',
+        category: '',
+        isArchived: false,
+        isChecked: false,
+      },
+      {
+        id: 45,
+        name: '【4】 不明なアイテム',
+        salesStatus: GoodsListItemSalesStatus.UNKNOWN,
+        salesType: GoodsListItemSalesType.A,
         estimatedPaymentYearMonth: 'XXXX-XX',
         category: '',
         isArchived: false,
@@ -207,8 +254,16 @@ describe('GoodsListSortService', () => {
     // ソート関数を実行
     const resultItems: GoodsListItem[] = (service as any).sortItems(
       shuffledItems,
-      testDate
+      testDate,
+      false
     );
+
+    // 結果に ID の重複がないことを確認
+    const resultIdSet = new Set<number>();
+    for (const resultItem of resultItems) {
+      expect(resultIdSet.has(resultItem.id)).toBe(false);
+      resultIdSet.add(resultItem.id);
+    }
 
     // 結果を確認
     expect(resultItems).toStrictEqual(testItems);

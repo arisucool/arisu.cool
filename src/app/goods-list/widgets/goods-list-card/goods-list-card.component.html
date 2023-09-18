@@ -107,8 +107,8 @@
       <!---->
 
       <!-- メーカー -->
-      <span class="maker">
-        {{ item.maker || "-" }}
+      <span class="maker" *ngIf="item.maker && item.maker.length > 0">
+        {{ item.maker }}
       </span>
       <!---->
 

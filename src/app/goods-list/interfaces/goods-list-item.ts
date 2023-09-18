@@ -38,7 +38,7 @@ export interface GoodsListRawItem {
   // カテゴリ
   category: string;
   // メーカー
-  maker: string;
+  maker?: string;
   // 商品名
   name: string;
 

@@ -40,7 +40,6 @@ describe('GoodsListService', () => {
         expectedStatus: GoodsListItemSalesStatus.BEFORE_RESERVATION,
         rawItem: {
           id: 10,
-          maker: '',
           name: 'まもなく予約開始になるアイテム',
           category: '',
           salesType: GoodsListItemSalesType.A,
@@ -53,7 +52,6 @@ describe('GoodsListService', () => {
         expectedStatus: GoodsListItemSalesStatus.RESERVATION,
         rawItem: {
           id: 20,
-          maker: '',
           name: '予約受付中のアイテム',
           category: '',
           salesType: GoodsListItemSalesType.A,
@@ -67,7 +65,6 @@ describe('GoodsListService', () => {
         expectedStatus: GoodsListItemSalesStatus.END_OF_RESERVATION,
         rawItem: {
           id: 30,
-          maker: '',
           name: '予約締切されたアイテム',
           category: '',
           salesType: GoodsListItemSalesType.A,
@@ -81,7 +78,6 @@ describe('GoodsListService', () => {
         expectedStatus: GoodsListItemSalesStatus.BEFORE_SALE,
         rawItem: {
           id: 40,
-          maker: '',
           name: '発売前のアイテム',
           category: '',
           salesType: GoodsListItemSalesType.A,
@@ -94,7 +90,6 @@ describe('GoodsListService', () => {
         expectedStatus: GoodsListItemSalesStatus.ON_SALE,
         rawItem: {
           id: 50,
-          maker: '',
           name: '販売中のアイテム',
           category: '',
           salesType: GoodsListItemSalesType.A,
@@ -108,7 +103,6 @@ describe('GoodsListService', () => {
         expectedStatus: GoodsListItemSalesStatus.END_OF_SALE,
         rawItem: {
           id: 60,
-          maker: '',
           name: '終売したアイテム',
           category: '',
           salesType: GoodsListItemSalesType.A,
@@ -122,7 +116,6 @@ describe('GoodsListService', () => {
         expectedStatus: GoodsListItemSalesStatus.END_OF_SALE,
         rawItem: {
           id: 61,
-          maker: '',
           name: '終売したアイテム',
           category: '',
           salesType: GoodsListItemSalesType.B,
@@ -136,7 +129,6 @@ describe('GoodsListService', () => {
         expectedStatus: GoodsListItemSalesStatus.BEFORE_RESALE,
         rawItem: {
           id: 70,
-          maker: '',
           name: '再販前のアイテム',
           category: '',
           salesType: GoodsListItemSalesType.A,
@@ -149,7 +141,6 @@ describe('GoodsListService', () => {
         expectedStatus: GoodsListItemSalesStatus.ON_RESALE,
         rawItem: {
           id: 80,
-          maker: '',
           name: '再販中のアイテム',
           category: '',
           salesType: GoodsListItemSalesType.A,
@@ -163,7 +154,6 @@ describe('GoodsListService', () => {
         expectedStatus: GoodsListItemSalesStatus.END_OF_RESALE,
         rawItem: {
           id: 90,
-          maker: '',
           name: '再販終了したアイテム',
           category: '',
           salesType: GoodsListItemSalesType.A,
@@ -177,7 +167,6 @@ describe('GoodsListService', () => {
         expectedStatus: GoodsListItemSalesStatus.END_OF_RESALE,
         rawItem: {
           id: 91,
-          maker: '',
           name: '再販終了したアイテム',
           category: '',
           salesType: GoodsListItemSalesType.B,
