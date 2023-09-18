@@ -2,6 +2,7 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import {
   GoodsListItem,
   GoodsListItemSalesStatus,
+  GoodsListItemSalesType,
 } from '../../interfaces/goods-list-item';
 import { MatDialog } from '@angular/material/dialog';
 import { GoodsListItemEditDialogComponent } from '../goods-list-item-edit-dialog/goods-list-item-edit-dialog.component';
@@ -20,7 +21,10 @@ export class GoodsListCardComponent implements OnInit {
   itemChange: EventEmitter<GoodsListItem> = new EventEmitter();
 
   // 販売ステータス
-  salesStatus: typeof GoodsListItemSalesStatus = GoodsListItemSalesStatus;
+  SalesStatus: typeof GoodsListItemSalesStatus = GoodsListItemSalesStatus;
+
+  // 販売種別
+  SalesType: typeof GoodsListItemSalesType = GoodsListItemSalesType;
 
   // 小計
   subtotalPrice = {
@@ -91,6 +95,12 @@ export class GoodsListCardComponent implements OnInit {
     const date = new Date(dateString);
     const isPast = date.getTime() < Date.now();
     return isPast;
+  }
+
+  isComingSoonDate(dateString: string) {
+    const date = new Date(dateString);
+    const PERIOD_OF_COMING_SOON = 1000 * 60 * 60 * 24 * 3; // 3日
+    return date.getTime() - Date.now() < PERIOD_OF_COMING_SOON;
   }
 
   async openEditDialog(item: GoodsListItem, isChild = false) {

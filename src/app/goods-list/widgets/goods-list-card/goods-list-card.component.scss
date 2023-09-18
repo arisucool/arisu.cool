@@ -113,10 +113,32 @@ mat-card {
     }
   }
 
+  // ピックアップ
+  .picked-up {
+    mat-icon {
+      color: #f39c12;
+      font-size: 1.2rem;
+      height: 1.2rem;
+      width: 1.2rem;
+      line-height: 1.2rem;
+      vertical-align: middle;
+    }
+  }
+
   // 日程
   .sales-date {
     margin-left: 1rem;
-    font-weight: bolder;
+
+    &.coming-soon {
+      color: #e74c3c;
+      font-weight: bolder;
+    }
+  }
+
+  // 販売種別
+  .sales-type {
+    font-size: 0.8rem;
+    font-style: italic;
   }
 
   // メーカー

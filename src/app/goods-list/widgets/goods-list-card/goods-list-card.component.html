@@ -1,15 +1,15 @@
 <mat-card
   [ngClass]="{
-    'sales-before-reservation': item.salesStatus === salesStatus.BEFORE_RESERVATION,
-    'sales-reservation': item.salesStatus === salesStatus.RESERVATION,
-    'sales-end-of-reservation': item.salesStatus === salesStatus.END_OF_RESERVATION,
-    'sales-before-sale': item.salesStatus === salesStatus.BEFORE_SALE,
-    'sales-on-sale': item.salesStatus === salesStatus.ON_SALE,
-    'sales-end-of-sale': item.salesStatus === salesStatus.END_OF_SALE,
-    'sales-before-resale': item.salesStatus === salesStatus.BEFORE_RESALE,
-    'sales-on-resale': item.salesStatus === salesStatus.ON_RESALE,
-    'sales-end-of-resale': item.salesStatus === salesStatus.END_OF_RESALE,
-    'sales-unknown': item.salesStatus === salesStatus.UNKNOWN,
+    'sales-before-reservation': item.salesStatus === SalesStatus.BEFORE_RESERVATION,
+    'sales-reservation': item.salesStatus === SalesStatus.RESERVATION,
+    'sales-end-of-reservation': item.salesStatus === SalesStatus.END_OF_RESERVATION,
+    'sales-before-sale': item.salesStatus === SalesStatus.BEFORE_SALE,
+    'sales-on-sale': item.salesStatus === SalesStatus.ON_SALE,
+    'sales-end-of-sale': item.salesStatus === SalesStatus.END_OF_SALE,
+    'sales-before-resale': item.salesStatus === SalesStatus.BEFORE_RESALE,
+    'sales-on-resale': item.salesStatus === SalesStatus.ON_RESALE,
+    'sales-end-of-resale': item.salesStatus === SalesStatus.END_OF_RESALE,
+    'sales-unknown': item.salesStatus === SalesStatus.UNKNOWN,
   }"
 >
   <mat-card-header>
@@ -18,91 +18,146 @@
     <!---->
     <!-- 商品情報 / 商品グループ情報 )-->
     <mat-card-subtitle class="item-summary">
+      <!-- ピックアップ -->
+      <ng-container *ngIf="item.pickedUpReason">
+        <span class="picked-up" [matTooltip]="item.pickedUpReason">
+          <mat-icon>new_releases</mat-icon>
+        </span>
+      </ng-container>
+      <!---->
+
       <!-- 発売状態 (予約開始前) -->
-      <ng-container *ngIf="item.salesStatus === salesStatus.BEFORE_RESERVATION">
+      <ng-container *ngIf="item.salesStatus === SalesStatus.BEFORE_RESERVATION">
         <span class="sales-status before-reservation"> 予約開始前 </span>
         <span
           class="sales-date"
           matTooltip="このグッズの予約開始日"
           *ngIf="item.reservationStartDate"
+          [ngClass]="{
+            'coming-soon': isComingSoonDate(item.reservationStartDate)
+          }"
         >
           {{ item.reservationStartDate | date : "yyyy/MM/dd" }} から
         </span>
       </ng-container>
       <!---->
       <!-- 発売状態 (予約受付中) -->
-      <ng-container *ngIf="item.salesStatus === salesStatus.RESERVATION">
+      <ng-container *ngIf="item.salesStatus === SalesStatus.RESERVATION">
         <span class="sales-status reservation"> 予約受付中 </span>
         <span
           class="sales-date"
           matTooltip="このグッズの予約締切日"
           *ngIf="item.reservationEndDate"
+          [ngClass]="{
+            'coming-soon': isComingSoonDate(item.reservationEndDate)
+          }"
         >
           {{ item.reservationEndDate | date : "yyyy/MM/dd" }} まで
         </span>
       </ng-container>
       <!---->
       <!-- 発売状態 (予約終了) -->
-      <ng-container *ngIf="item.salesStatus === salesStatus.END_OF_RESERVATION">
+      <ng-container *ngIf="item.salesStatus === SalesStatus.END_OF_RESERVATION">
         <span class="sales-status end-of-reservation"> 予約終了 </span>
       </ng-container>
       <!---->
 
       <!-- 発売状態 (発売前) -->
-      <ng-container *ngIf="item.salesStatus === salesStatus.BEFORE_SALE">
+      <ng-container *ngIf="item.salesStatus === SalesStatus.BEFORE_SALE">
         <span class="sales-status before-sale"> 発売前 </span>
-        <span class="sales-date" matTooltip="このグッズの発売日">
+        <span
+          class="sales-date"
+          matTooltip="このグッズの発売日"
+          *ngIf="item.saleDate"
+          [ngClass]="{ 'coming-soon': isComingSoonDate(item.saleDate) }"
+        >
           {{ item.saleDate | date : "yyyy/MM/dd" }} から
         </span>
       </ng-container>
       <!---->
       <!-- 発売状態 (販売中) -->
-      <ng-container *ngIf="item.salesStatus === salesStatus.ON_SALE">
+      <ng-container *ngIf="item.salesStatus === SalesStatus.ON_SALE">
         <span class="sales-status on-sale"> 販売中 </span>
         <span
           class="sales-date"
           matTooltip="このグッズの終売日"
           *ngIf="item.endOfSaleDate"
+          [ngClass]="{ 'coming-soon': isComingSoonDate(item.endOfSaleDate) }"
         >
           {{ item.endOfSaleDate | date : "yyyy/MM/dd" }} まで
         </span>
       </ng-container>
       <!---->
       <!-- 発売状態 (終売) -->
-      <ng-container *ngIf="item.salesStatus === salesStatus.END_OF_SALE">
+      <ng-container *ngIf="item.salesStatus === SalesStatus.END_OF_SALE">
         <span class="sales-status end-of-sale"> 終売 </span>
       </ng-container>
       <!---->
 
       <!-- 発売状態 (再販前) -->
-      <ng-container *ngIf="item.salesStatus === salesStatus.BEFORE_RESALE">
+      <ng-container *ngIf="item.salesStatus === SalesStatus.BEFORE_RESALE">
         <span class="sales-status before-resale"> 再販前 </span>
-        <span class="sales-date" matTooltip="このグッズの再販日">
+        <span
+          class="sales-date"
+          matTooltip="このグッズの再販日"
+          *ngIf="item.resaleDate"
+          [ngClass]="{ 'coming-soon': isComingSoonDate(item.resaleDate) }"
+        >
           {{ item.resaleDate | date : "yyyy/MM/dd" }} から
         </span>
       </ng-container>
       <!---->
       <!-- 発売状態 (再販中) -->
-      <ng-container *ngIf="item.salesStatus === salesStatus.ON_RESALE">
+      <ng-container *ngIf="item.salesStatus === SalesStatus.ON_RESALE">
         <span class="sales-status on-resale"> 再販中 </span>
         <span
           class="sales-date"
           matTooltip="このグッズの再販終了日"
           *ngIf="item.endOfResaleDate"
+          [ngClass]="{ 'coming-soon': isComingSoonDate(item.endOfResaleDate) }"
         >
           {{ item.endOfResaleDate | date : "yyyy/MM/dd" }} まで
         </span>
       </ng-container>
       <!---->
       <!-- 発売状態 (再販終了) -->
-      <ng-container *ngIf="item.salesStatus === salesStatus.END_OF_RESALE">
+      <ng-container *ngIf="item.salesStatus === SalesStatus.END_OF_RESALE">
         <span class="sales-status end-of-resale"> 再販終了 </span>
       </ng-container>
       <!---->
 
       <!-- 発売状態 (不明) -->
-      <ng-container *ngIf="item.salesStatus === salesStatus.UNKNOWN">
+      <ng-container *ngIf="item.salesStatus === SalesStatus.UNKNOWN">
         <span class="sales-status unknown"> 不明 </span>
+      </ng-container>
+      <!---->
+
+      <!-- 販売方法 -->
+      <ng-container *ngIf="item.salesType === SalesType.B">
+        <span
+          class="sales-type"
+          matTooltip="この商品は数量限定・先着販売の可能性があります"
+        >
+          限定
+        </span>
+      </ng-container>
+      <ng-container
+        *ngIf="
+          item.salesType === SalesType.A_B &&
+          (item.salesStatus === SalesStatus.ON_SALE ||
+            item.salesStatus === SalesStatus.BEFORE_SALE ||
+            item.salesStatus === SalesStatus.END_OF_SALE ||
+            item.salesStatus === SalesStatus.ON_RESALE ||
+            item.salesStatus === SalesStatus.BEFORE_RESALE ||
+            item.salesStatus === SalesStatus.END_OF_RESALE)
+        "
+      >
+        <span
+          class="sales-type"
+          matTooltip="現在、この商品は数量限定・先着販売となっている可能性があります"
+        >
+          限定
+        </span>
       </ng-container>
       <!---->
 

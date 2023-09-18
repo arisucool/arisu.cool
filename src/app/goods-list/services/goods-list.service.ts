@@ -320,6 +320,9 @@ export class GoodsListService {
         salesStatus: salesStatus,
         salesType: salesType,
         estimatedPaymentYearMonth: estimatedPaymentYearMonth,
+        pickedUpReason: undefined,
+        criteriaDate: undefined,
+        isCriteriaDateClose: false,
         isChecked: false,
         isArchived: false,
       };
@@ -333,6 +336,7 @@ export class GoodsListService {
       items.push(item);
     }
 
+    // 全項目を処理
     for (const item of items) {
       const status: GoodsListItemStatus | undefined = await this.storage?.get(
         item.id.toString()
@@ -355,6 +359,13 @@ export class GoodsListService {
       const isArchived = status ? status['isArchived'] : false;
       item.isArchived = isArchived;
 
+      const { criteriaDate, isCriteriaDateClose } = this.getCriteriaDate(item);
+
+      item.pickedUpReason = this.getPickedUpReason(
+        item,
+        item.salesType,
+        item.salesStatus
+      );
       const selectedPaymentYearMonth = status ? status['paymentYearMonth'] : '';
       item.selectedPaymentYearMonth = selectedPaymentYearMonth;
     }
@@ -548,6 +559,172 @@ export class GoodsListService {
     }
 
     return estimatedPaymentYearMonth as string;
+  }
+
+  private getCriteriaDate(item: GoodsListItem): {
+    criteriaDate?: Date;
+    isCriteriaDateClose: boolean;
+  } {
+    let dates: string[] = [];
+    let isCriteriaDateClose = false;
+
+    switch (item.salesStatus) {
+      case GoodsListItemSalesStatus.BEFORE_RESERVATION: {
+        // 予約開始前なら
+        if (item.reservationStartDate) {
+          // 予約開始日があれば、予約開始日を設定
+          dates.push(item.reservationStartDate);
+        }
+      }
+    }
+
+    // 最も近い日付を取得
+    let criteriaDate: Date | undefined;
+    if (dates.length > 0) {
+      criteriaDate = new Date(
+        Math.min(...dates.map((date) => new Date(date).getTime()))
+      );
+    }
+
+    // 基準日までの日数を計算
+    if (criteriaDate) {
+      const now = new Date();
+      const diff = criteriaDate.getTime() - now.getTime();
+      const diffDays = Math.ceil(diff / (1000 * 60 * 60 * 24));
+      if (diffDays <= 3) {
+        // 基準日が3日以内なら、基準日が近いとみなす
+        isCriteriaDateClose = true;
+      }
+    }
+
+    return {
+      criteriaDate: criteriaDate,
+      isCriteriaDateClose: isCriteriaDateClose,
+    };
+  }
+
+  private getPickedUpReason(
+    item: GoodsListItem,
+    salesType: GoodsListItemSalesType,
+    salesStatus: GoodsListItemSalesStatus,
+    now = new Date()
+  ) {
+    const THRESHOULD_1_DAYS = 1000 * 60 * 60 * 24;
+    const THRESHOULD_3_DAYS = THRESHOULD_1_DAYS * 3;
+    const THRESHOULD_7_DAYS = THRESHOULD_1_DAYS * 7;
+    const THRESHOULD_14_DAYS = THRESHOULD_1_DAYS * 14;
+
+    const nowTime = now.getTime();
+
+    switch (salesStatus) {
+      case GoodsListItemSalesStatus.BEFORE_RESERVATION: {
+        // 予約開始前なら
+        if (salesType === GoodsListItemSalesType.B) {
+          // 先着で予約開始前ならば、ピックアップ
+          return '先着/数量限定の予約開始がまもなく始まるため';
+        }
+        break;
+      }
+      case GoodsListItemSalesStatus.RESERVATION: {
+        // 予約受付中なら
+        if (
+          item.reservationStartDate &&
+          new Date(item.reservationStartDate).getTime() + THRESHOULD_3_DAYS >=
+            nowTime
+        ) {
+          // 予約開始直後ならば
+          return '予約開始直後のため';
+        } else if (
+          item.reservationEndDate &&
+          new Date(item.reservationEndDate).getTime() - THRESHOULD_3_DAYS <=
+            nowTime
+        ) {
+          // 予約終了間際ならば
+          return '予約終了が迫っているため';
+        }
+        break;
+      }
+      case GoodsListItemSalesStatus.BEFORE_SALE: {
+        // 発売前なら
+        if (
+          salesType === GoodsListItemSalesType.B ||
+          salesType === GoodsListItemSalesType.A_B
+        ) {
+          // 先着で販売開始される前ならば、ピックアップ
+          return '先着/数量限定でまもなく発売のため';
+        }
+        break;
+      }
+      case GoodsListItemSalesStatus.ON_SALE: {
+        // 販売中なら
+        if (
+          salesType === GoodsListItemSalesType.B ||
+          salesType === GoodsListItemSalesType.A_B
+        ) {
+          // 先着なら
+          if (
+            item.saleDate &&
+            new Date(item.saleDate).getTime() + THRESHOULD_3_DAYS >= nowTime
+          ) {
+            // 発売直後ならば
+            return '先着/数量限定で発売直後のため';
+          }
+        } else {
+          // 受注販売/流注ならば
+          if (
+            item.saleDate &&
+            new Date(item.saleDate).getTime() + THRESHOULD_3_DAYS >= nowTime
+          ) {
+            // 発売直後ならば
+            return '発売直後のため';
+          } else if (
+            item.endOfSaleDate &&
+            new Date(item.endOfSaleDate).getTime() - THRESHOULD_3_DAYS <=
+              nowTime
+          ) {
+            // 終売間近ならば
+            return '終売が迫っているため';
+          }
+        }
+        break;
+      }
+      case GoodsListItemSalesStatus.ON_RESALE: {
+        // 再販中なら
+        if (
+          salesType === GoodsListItemSalesType.B ||
+          salesType === GoodsListItemSalesType.A_B
+        ) {
+          // 先着なら
+          if (
+            item.resaleDate &&
+            new Date(item.resaleDate).getTime() + THRESHOULD_3_DAYS >= nowTime
+          ) {
+            // 再販直後ならば
+            return '先着/数量限定で再販直後のため';
+          }
+        } else {
+          // 受注販売/流注ならば
+          if (
+            item.resaleDate &&
+            new Date(item.resaleDate).getTime() + THRESHOULD_3_DAYS >= nowTime
+          ) {
+            // 発売直後ならば
+            return '発売直後のため';
+          } else if (
+            item.endOfResaleDate &&
+            new Date(item.endOfResaleDate).getTime() - THRESHOULD_3_DAYS <=
+              nowTime
+          ) {
+            // 終売間近ならば
+            return '終売が迫っているため';
+          }
+        }
+        break;
+      }
+    }
+
+    // ピックアップすべきでない
+    return undefined;
   }
 
   private dateToYearMonth(date: string | Date) {

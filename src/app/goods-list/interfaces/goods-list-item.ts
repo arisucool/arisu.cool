@@ -104,6 +104,14 @@ export interface GoodsListItem extends GoodsListRawItem {
   // 販売ステータス
   salesStatus: GoodsListItemSalesStatus;
 
+  // ピックアップされた理由 (ピックアップされない場合は undefined)
+  pickedUpReason?: string;
+
+  // ソートなどの基準日
+  criteriaDate?: Date;
+  // 基準日が迫っているか
+  isCriteriaDateClose: boolean;
+
   // 購入フラグ
   isChecked: boolean;
 
