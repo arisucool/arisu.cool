@@ -4,11 +4,15 @@ import { CommonModule } from '@angular/common';
 import { HomeRoutingModule } from './home-routing.module';
 import { SharedModule } from '../shared/shared.module';
 import { HomePageComponent } from './pages/home-page/home-page.component';
+import { NgxTwitterWidgetsModule } from 'ngx-twitter-widgets';
 
 @NgModule({
-  declarations: [
-    HomePageComponent
+  declarations: [HomePageComponent],
+  imports: [
+    CommonModule,
+    HomeRoutingModule,
+    SharedModule,
+    NgxTwitterWidgetsModule,
   ],
-  imports: [CommonModule, HomeRoutingModule, SharedModule],
 })
 export class HomeModule {}
